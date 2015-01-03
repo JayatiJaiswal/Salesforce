@@ -1,0 +1,108 @@
+//Date 23/11/2013
+//Author : Jayati Jaiswal
+
+trigger Trigger_Task_Email on Task (after insert, after update) {
+
+String Last_Modified;
+String User_email;
+
+    Account A = new Account();
+    Task T = new Task();
+    // Added-13-12-2013-Jayati Emails and umap used to fetch the user details and User emails 
+    list<string> emails = new list<string>(); 
+    map<id,user> umap = new map<id,user>();      
+    for(user u : [select id,name,email from user])
+    {
+       umap.put(u.id,u);
+    }
+    //
+    
+  // Added-02-1-2014-Jayati - Fetch URL of current task    
+  String fullFileURL;
+    fullFileURL = URL.getSalesforceBaseUrl().toExternalForm() + '/' + Trigger.new[0].ID;  
+  //
+   
+    Last_Modified = UserInfo.getName();
+    User_email= UserInfo.getUserEmail();
+
+    try{    
+    A = [Select id,Account_Region_del__c,Account_Sub_Region__c,Name,Owner.email,Sales_Account_Owner__r.email,Campaign_Manager__r.email,InMobi_AM__r.email from Account where ID =:Trigger.new[0].AccountId];
+    }
+    catch(Exception e){
+        system.debug('Account ID not present');
+    }    
+    // Added-13-12-2013-Jayati Loop used to get the email ids of user      
+    for(AccountTeamMember atm : [select id,userid,accountid from AccountTeamMember where accountid=:Trigger.new[0].AccountId]){
+      if(atm != null && ( atm.userid != null || atm.userid != '') && umap.containskey(atm.userid) && umap.get(atm.userid).email!= null){
+                emails.add(umap.get(atm.userid).email);
+                
+                }
+    }
+    //
+    
+    // Added-13-12-2013-Jayati Query to fetch all attachments of the task    
+    List<Attachment> attachments = [select Id, Name, Body, ContentType from Attachment where parentid  =:Trigger.new[0].id];  
+    //
+    
+    for(Task tsk : Trigger.New)
+    {
+        Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+        // Added-13-12-2013-Jayati  Add attachment details to attachment list        
+        List<Messaging.EmailFileAttachment> emailAttachments = new List<Messaging.EmailFileAttachment>(); 
+        for(Attachment attachment : attachments)
+        {
+            Messaging.EmailFileAttachment emailAttachment = new Messaging.EmailFileAttachment();
+            emailAttachment.setBody(attachment.Body);
+            emailAttachment.setContentType(attachment.ContentType);
+            emailAttachment.setFilename(attachment.Name);
+            emailAttachments.add(emailAttachment);                                  
+        }
+        //
+        
+        mail.setFileAttachments(emailAttachments);   
+        String[] toAddresses = new String[] {User_email};
+        String[] toAddresses_cc = new String[] {};
+        
+        // Added-13-12-2013-Jayati Account Team Memmer email address added       
+        if(emails.size() > 0 )
+          toaddresses_cc.addall(emails);
+        if(A.Sales_Account_Owner__r.email != null)
+          toaddresses_cc.add(A.Sales_Account_Owner__r.email);
+        if(A.Campaign_Manager__r.email != null)
+          toaddresses_cc.add(A.Campaign_Manager__r.email);  
+        if(A.Campaign_Manager__r.email != null)
+          toaddresses_cc.add(A.InMobi_AM__r.email);             
+             
+        //
+
+        mail.setToAddresses(toAddresses);  
+        mail.setCcAddresses(toAddresses_cc);
+        mail.setSubject('A Task owned by you has been updated');    // Set the subject
+        String template = 'Hi, \n\nYour Task trigger for Account Name - {1} has been modified. Below are the details - \n\n';
+        template+= 'Subject - {2}\n';
+        template+= 'Due Date - {3}\n';
+        template+= 'Last Modified By - {4}\n';        
+        template+= 'Comments - {5}\n';
+        template+= 'Task Url - {6}\n';        
+        String duedate = '';
+        if (Trigger.new[0].ActivityDate==null)
+            duedate = 'None';
+        else
+            duedate = Trigger.new[0].ActivityDate.format();
+        List<String> args = new List<String>();
+        args.add(A.Name); 
+        args.add(A.Name);        
+        args.add(tsk.Subject);
+        args.add(duedate);
+        args.add(Last_Modified);        
+        args.add(tsk.Description);
+        args.add(URL.getSalesforceBaseUrl().toExternalForm() + '/' + Trigger.new[0].ID);            
+
+        // Here's the String.format() call.
+        String formattedHtml = String.format(template, args);
+       
+        mail.setPlainTextBody(formattedHtml);
+        Messaging.SendEmail(new Messaging.SingleEmailMessage[] {mail});
+    }
+   
+}
