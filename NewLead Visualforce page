@@ -1,0 +1,222 @@
+<apex:page StandardController="Lead" extensions="LeadCreate">
+<apex:includeScript value="{!$Resource.jQuery}"/>
+    <style>
+        .boxreq { box-shadow: 0px; border-left: 3px solid #C00; padding-left:3px; margin-left:-3px; }
+    </style>
+    <script>
+
+      $("body").click(function(){            
+          var hideOppList = document.getElementById('j_id0:form1:pgBlock:j_id34:j_id40:resultOppName');                                 
+          hideOppList.style.display = 'none'; 
+      });  
+    
+      $(document).ready(function() {   
+            $('#panelDiv').hide();                
+            var date_remind2 = document.getElementById("j_id0:form1:pgBlock:LeadInfo:j_id57:SalesStage2").value;                  
+            if(date_remind2 == "Future Re-contact")
+            {    document.getElementById('j_id0:form1:pgBlock:LeadInfo:j_id57:date_reminder1').classList.add('boxreq');   
+            }              
+            else { 
+                 document.getElementById('j_id0:form1:pgBlock:LeadInfo:j_id57:date_reminder1').classList.remove('boxreq');  
+            }
+      });    
+
+      function salesstagej(e)
+        { 
+        var stageval = e.value; 
+            if(stageval == "Future Re-contact")
+            { 
+                document.getElementById('j_id0:form1:pgBlock:j_id34:j_id55:date_remindval').classList.add('boxreq');
+                document.getElementById("j_id0:form1:hdnStageField").value = true; 
+            }
+            else
+            {   document.getElementById('j_id0:form1:pgBlock:j_id34:j_id55:date_remindval').classList.remove('boxreq');
+                document.getElementById("j_id0:form1:hdnStageField").value = false;
+            }
+       } 
+
+     function salesstagek(e)
+        { 
+         document.getElementById("j_id0:form1:hdnStageField").value = false;
+        var stageval1 = e.value; 
+            if(stageval1 == "Future Re-contact")
+            { document.getElementById('j_id0:form1:pgBlock:LeadInfo:j_id57:date_reminder1').classList.add('boxreq');                 
+            }
+            else
+            {   document.getElementById('j_id0:form1:pgBlock:LeadInfo:j_id57:date_reminder1').classList.remove('boxreq'); 
+            }
+       } 
+       
+        function salesstagei()
+        {          
+        var stageval1 = document.getElementById("j_id0:form1:pgBlock:LeadInfo:j_id57:SalesStage2").value; 
+            if(stageval1 == "Future Re-contact")
+            {   document.getElementById('j_id0:form1:pgBlock:LeadInfo:j_id57:date_reminder1').classList.add('boxreq'); 
+            }
+            else
+            {   document.getElementById('j_id0:form1:pgBlock:LeadInfo:j_id57:date_reminder1').classList.remove('boxreq'); 
+            }
+       } 
+
+        function salesstagenew()
+        {          
+        var stageval1 = document.getElementById("j_id0:form1:pgBlock:j_id34:j_id55:Salestage").value; 
+            if(stageval1 == "Future Re-contact")
+            {   document.getElementById('j_id0:form1:pgBlock:j_id34:j_id55:date_remindval').classList.add('boxreq'); 
+            }
+            else
+            {   document.getElementById('j_id0:form1:pgBlock:j_id34:j_id55:date_remindval').classList.remove('boxreq'); 
+            }
+       } 
+   </script>
+    
+    <apex:form id="form1">
+        <apex:inputHidden id="hdnStageField" value="{!stageValue}" />
+        <apex:pageblock title="New Lead - Creation Page" id="pgBlock">
+        <apex:PageMessages />
+            <apex:pageBlockButtons >    
+                    <apex:commandButton value="Save" action="{!saveLead}"/>
+                    <apex:commandButton value="Save and New" action="{!saveandnew}"/>
+                    <apex:commandButton value="Add More Info" action="{!addMoreInfo}" reRender="pgBlock" rendered="{!boolshowAddMoreInfo}"/>
+                    <apex:commandButton value="Cancel" action="{!Cancel}"/>
+            </apex:pageBlockButtons>
+            
+            <apex:pageBlock rendered="{!addInfoToggle}" onclick="salesstagenew();">  
+                 <apex:pageBlockSection title="Lead Information" columns="4">                 
+                            <table><tr><apex:outputText value="Company" style="color: #4A4A56; margin-left:51%; font-family:Arial,Helvetica,sans-serif; font-size:11px; font-weight:bold; coolor:#4A4A56 "/>                                                                                             
+                            <apex:inputText id="oppName" value="{!NameSearchText}" styleClass="boxreq" style="margin-left:-12%;"> 
+                                <apex:actionsupport Event="onkeyup" action="{!displaymatchedLeads}" />
+                            </apex:inputText></tr></table>
+                 </apex:pageBlockSection> 
+                 <apex:pageBlockSection >                                                                                                                                            
+                            <div id ="panelDiv" styleClass="resultadd">
+                           
+                            <apex:pageblocktable id="resultOppName" value="{!wrapperSearchOppNameList}" var="Lead1" rendered="{!boolShowLeadList}" style="width:100%; align:left; margin-left:-147px;">                                                                
+                                <apex:column >
+                                    <apex:facet name="header">
+                                        Name
+                                    </apex:facet>
+                                     <apex:outputLink value="/{!Lead1.Id}">{!Lead1.Name}</apex:outputLink>
+                                </apex:column>
+                                <apex:column value="{!Lead1.Type}">
+                                    <apex:facet name="header">
+                                         Type
+                                    </apex:facet>                                                              
+                                </apex:column>                                  
+                                <apex:column value="{!Lead1.Owner}" >
+                                    <apex:facet name="header">
+                                        Owner
+                                    </apex:facet>
+                                </apex:column>  
+                                <apex:column value="{!Lead1.Region}" >
+                                    <apex:facet name="header">
+                                        Region
+                                    </apex:facet>
+                                </apex:column> 
+                                <apex:column value="{!Lead1.country}" >
+                                    <apex:facet name="header">
+                                        Country
+                                    </apex:facet>
+                                </apex:column>                   
+                            </apex:pageblocktable>
+                         
+                            </div> 
+                  </apex:pageBlockSection>
+                <apex:pageBlockSection >                                 
+                            <apex:inputField id="firstname" value="{!LeadData.FirstName}" styleClass="boxreq"/>   
+                            <apex:inputField id="leadsource" value="{!LeadData.LeadSource}" styleClass="boxreq"/>                              
+                            <apex:inputField id="Lastname" value="{!LeadData.LastName}" required="false" styleClass="boxreq"/>    
+                            <apex:inputField value="{!LeadData.Status}" id="status" required="false" styleClass="boxreq" style="width:164px;"/>                                                    
+                            <apex:inputField id="country" value="{!LeadData.Country}" required="false" styleClass="boxreq"/> 
+                            <apex:inputField value="{!LeadData.Lead_Type__c}" id="leadtype" required="false" style="width:162px;"/>  
+                            <apex:inputField id="email" value="{!LeadData.Email}" required="false"/>                                            
+                            <apex:inputField id="Salestage" value="{!LeadData.Sales_Stage__c}" required="false" styleClass="boxreq salesst" onchange="salesstagej(this);" style="width:164px;"/>                            
+                            <apex:inputField id="sourceurl" value="{!LeadData.Source_Url__c}" required="false" style="height:16px; width:135px;"/>    
+                            <apex:inputField value="{!LeadData.Sales_Sub_Stage__c}" id="salessub" required="false" style="width:164px;"/>                                 
+                            <apex:inputField id="burnperday" value="{!LeadData.Expected_Burn_per_day__c}" required="false"/>                            
+                            <apex:inputField id="date_remindval" value="{!LeadData.Reminder_Date__c}" required="false"/>                         
+                            <apex:inputField value="{!LeadData.Customer_Message__c}" id="customermsg" required="false"/>    
+                            <apex:inputField value="{!LeadData.Expected_Closure_Date__c}" id="closuredate" required="false"/>                                                                                                                              
+                </apex:pageBlockSection>
+              </apex:pageBlock>
+              <apex:outputPanel rendered="{!(!addInfoToggle)}">  
+                            
+              <apex:pageBlock id="LeadInfo">  
+                  <apex:pageBlockSection title="Lead More Information" columns="2" onclick="salesstagei();">                                   
+                                <apex:outputField id="owner" value="{!LeadData.OwnerId}"/>                                                                                                        
+                                <apex:inputField id="LeadSource2" value="{!LeadData.LeadSource}" styleClass="boxreq" style="width:159px;" required="false"/>  
+                                <apex:outputText id="Companyname2" value=" Company Name    :    {!NameSearchText}" style="margin-left:80px;"/>                                 
+                                <apex:inputField id="Subsource" value="{!LeadData.Lead_SubSource__c}" style="width:158px;"/>
+                                <apex:inputField id="Leadtitle2" value="{!LeadData.Title}" />                          
+                                <apex:inputField value="{!LeadData.Lead_Type__c}" id="stage" style="width:159px;"/>                                                                     
+                                <apex:inputField id="Firstname2" value="{!LeadData.FirstName}" styleClass="boxreq" required="false"/>                                                                        
+                                <apex:inputField id="LeadSegment2" value="{!LeadData.Lead_Segment__c}" style="width:159px;"/>                                                                         
+                                <apex:inputField id="LastName2" value="{!LeadData.LastName}" styleClass="boxreq" required="false"/>                                                                       
+                                <apex:inputField id="Industry2" value="{!LeadData.Industry}" style="width:159px;"/>                                                                       
+                                <apex:inputField id="Phone2" value="{!LeadData.Phone}" />   
+                                <apex:inputField id="Enrichment_Level" value="{!LeadData.Enrichment_Level__c}" style="width:159px;"/>                                                                                                                                                                          
+                                <apex:inputField id="Email2" value="{!LeadData.Email}" />     
+                                <apex:inputField id="Region2" value="{!LeadData.Lead_Region__c}" style="width:159px;"/>                                                                    
+                                <apex:inputField id="EmailOptin2" value="{!LeadData.Email_Optin__c}" />                                                                                                                                                                                
+                                <apex:inputField id="Status2" value="{!LeadData.Status}" styleClass="boxreq" style="width:159px;" required="false"/>                                                                        
+                                <apex:inputField id="LeadValue2" value="{!LeadData.Lead_Value__c}" />                                                                        
+                                <apex:inputField id="SalesStage2" value="{!LeadData.Sales_Stage__c}" onchange="salesstagek(this)" style="width:159px;" styleClass="salesst1"/>                                                  
+                                <apex:inputField id="Sourceurl2" value="{!LeadData.Source_Url__c}" style="height:16px; width:135px;"/>                                    
+                                <apex:inputField id="salessub2" value="{!LeadData.Sales_Sub_Stage__c}"/>  
+                                <apex:inputField id="Exp_burn" value="{!LeadData.Expected_Burn_per_day__c}" />                                                                                                             
+                                <apex:inputField id="date_reminder1" value="{!LeadData.Reminder_Date__c}" />                                                                                                                                                                                                                                                                                    
+                                <apex:inputField id="NetAccID" value="{!LeadData.Ad_Network_Account_ID__c}" />  
+                                <apex:inputField id="Exp_close" value="{!LeadData.Expected_Closure_Date__c}" />                                                 
+                </apex:pageBlockSection>
+            </apex:pageBlock>
+            
+            <apex:pageBlock id="AddressInfo"> 
+                <apex:pageBlockSection title="Address Information" columns="2">
+                                <apex:inputField id="Street" value="{!LeadData.Street}" style="height:16px; width:140px;"/>
+                                <apex:inputField id="Website" value="{!LeadData.Website}" />                         
+                                <apex:inputField value="{!LeadData.City}"/>
+                                <apex:inputField id="State" value="{!LeadData.State}" />                         
+                                <apex:inputField id="postalcode" value="{!LeadData.Postalcode}" />                         
+                                <apex:inputField id="Country2" value="{!LeadData.Country}" required="false" styleClass="boxreq"/>                         
+                </apex:pageBlockSection>                                  
+            </apex:pageBlock>
+
+            <apex:pageblock id="DeveloperSpec">
+                <apex:pageBlockSection title="Developer Specific Field" columns="2">                
+                                <apex:inputField id="Lead_Score" value="{!LeadData.Lead_Score__c}" />   
+                                <apex:inputField id="Total_Impressions_Potential" value="{!LeadData.Total_Impressions_Potential__c}"/>                                                                                                              
+                                <apex:inputField id="potTotalBurnPerDay" value="{!LeadData.Total_Installs__c}" />                                                                                      
+                                <apex:inputField id="TotalRatingCount" value="{!LeadData.Total_Rating_Count__c}"/>
+                                <apex:inputField id="Average_App_Rating" value="{!LeadData.Average_App_Rating__c}"/>
+                                <apex:inputField id="Total_Number_of_Apps" value="{!LeadData.Total_Number_of_Apps__c}"/>
+                                <apex:inputField id="TopLevelCategory" value="{!LeadData.Top_Level_Category__c}"/>
+                                <apex:inputField id="AppNature" value="{!LeadData.App_nature__c}" style="width:142px;"/>  
+                                <apex:inputField id="Sub_Category" value="{!LeadData.Sub_Category__c}"/>
+                                <apex:inputField id="AppCategory" value="{!LeadData.App_Category__c}" style="width:142px;"/>  
+                                <apex:inputField id="Integration_Info" value="{!LeadData.Integration_Info__c}"/>                                                              
+                                <apex:inputField id="Integration_Method" value="{!LeadData.Integration_Method__c}" style="width:142px;"/>
+                                <apex:outputText value=" "/>
+                                <apex:inputField id="PitchTask" value="{!LeadData.Pitch_task__c}" style="width:142px;"/>                                  
+                                <apex:inputField id="ProductOpportunity" value="{!LeadData.Product_Opportunity__c}"/>                                
+                                <apex:inputField id="numOfSitesApp" value="{!LeadData.Platform__c}"/>                 
+                </apex:pageBlockSection> 
+            </apex:pageblock>
+            
+            <apex:pageBlock id="MarketoSpec"> 
+                <apex:pageBlockSection title="Marketo Specific Field" columns="2">              
+                                <apex:inputField id="BehavioralScore" value="{!LeadData.Behavioral_Score__c}"/>
+                                <apex:inputField id="DemographicScore" value="{!LeadData.Demographic_Score__c}"/>
+                </apex:pageBlockSection>                                       
+            </apex:pageBlock>
+            
+            <apex:pageBlock id="DescriptionInfo">
+                <apex:pageBlockSection title="Description Information" columns="2">                           
+                                <apex:inputField id="Description" value="{!LeadData.Description}" />                           
+                                <apex:inputField id="DocumentDownload" value="{!LeadData.Document_Download__c}"/>                              
+                                <apex:inputField id="CustomerMessage" value="{!LeadData.Customer_Message__c}"/>                                             
+                </apex:pageBlockSection>                                       
+            </apex:pageBlock>
+            </apex:outputPanel>
+        </apex:pageblock>    
+    </apex:form>
+</apex:page>
