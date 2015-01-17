@@ -1,0 +1,875 @@
+<apex:page showHeader="false" sidebar="false"  standardStylesheets="false">
+    <head>
+        <apex:includeScript value="{!$Resource.jQuery}"/>
+        <apex:includeScript value="{!$Resource.bootstrapmin}"/>
+        <meta charset="utf-8"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <meta name="description" content="SalesForce TroubleShoot"/>
+        <meta name="author" content="Jayati"/>
+        <link href="css/bootstrap.min.css" rel="stylesheet"/>
+        <link href="css/offcanvas.css" rel="stylesheet"/>      
+        <title>SalesForce TroubleShoot</title>
+        <apex:stylesheet value="{!$Resource.bootstrap}"/> 
+        <apex:stylesheet value="{!$Resource.css1}"/>         
+        <apex:includeScript value="{!$Resource.css2}"/>
+        <apex:includeScript value="{!$Resource.css4}"/>
+        <script>
+
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+          })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+          ga('create', 'UA-47957752-1', 'force.com');
+        ga('send', 'pageview');
+        </script>
+    </head>
+<style>
+.headerRow { display :none; } 
+.hidden-div .glyphicon-chevron-down { background: url(https://na13.salesforce.com/resource/1391782863000/minus) no-repeat center center; height:20px; width:20px; float:right;}
+.hidden-div.collapsed .glyphicon-chevron-down, .glyphicon-chevron-down  { background: url(https://na13.salesforce.com/resource/1391782940000/plus) no-repeat center center; height:20px; width:20px; float:right;}
+.hidden-div.even {  background-color:#66b8df;}
+.hidden-div.odd { background-color:#cce7f4;}
+.odd , .even { box-shadow: 5px 5px 5px 2px #888888;}
+.odd.collapsed {  background-color:#cce7f4; }
+.even.collapsed {  background-color:#66b8df; } 
+h5 { text-align:left; color:black; font-size:12px; font-family: 'Exo 2', sans-serif; }
+.btn-default { margin-bottom:6px; border-radius : 0; }
+.btn1 { width: 800px; height: 50px;}
+body { font-family: Segoe UI; background-color:#D4D4D4;}
+.panel-collapse { font-family: Segoe UI; }
+
+
+.glyphicon.glyphicon-chevron-down { float:left; }
+.ttry { white-space: pre-wrap; }
+outputLabel { text-align:center; color:#686868;} 
+.note { align:left; text-align:left; font-family: Segoe UI; font-size:12px; float:left; } 
+.list-group-item { color:black; background-color:rgb(0, 138, 203); text-align:center; cursor:pointer;}
+.list-group-item.in { color:black; background-color:#75bfe2; text-align:center; margin-left:5px; margin-right:5px;}
+
+
+.highlight { background: #ebebeb; height:300px;}
+ 
+p { margin-left:2%; margin-bottom:-2px;}
+span { color : transparent; }
+
+.btn-success { background-color:#008acb; border:0; }
+a.list-group-item.active, a.list-group-item.in.active {
+    background-color:gray;
+    border-style:solid;
+    border-width:2px;
+    border-color:#66b8df;
+    }
+a.list-group-item { color: black;}  
+a.list-group-item:hover { background-color:black;  color:white;}    
+a.list-group-item.active:hover, a.list-group-item.in.active:hover { background-color:black;  text-align:center; color:white;}
+.btn.btn-success:hover { background-color:#008acb; }
+li { margin-left:-20px; }
+ol {font-weight: bold; margin-top:-1px; margin-bottom:-1px; }
+ol li div {font-weight: normal ;}
+.inside { margin-left:20px; }
+</style>
+<body>
+<apex:form id="seachform">  
+    <div class="navbar navbar-fixed-top navbar-inverse" role="navigation" style="background-color:black; border:none;">
+        <div class="container" style="margin-left:9%; margin-right:0px; padding:0;">  
+            <form class="navbar-form navbar-right">
+                <div class="form-group">
+                        <div style="margin-top:1%; margin-left:2%; padding-right:30px; padding-left:30px;">
+    
+                            <a href="https://na13.salesforce.com/home/home.jsp?sdtd=1"><apex:image url="{!$Resource.logoprimary}" height="15" style="margin-top:8px; float:left; margin-left:-60px;"/></a>
+                            <a href="https://na13.salesforce.com/home/home.jsp?sdtd=1"><apex:image url="{!$Resource.sflogo}" height="50" width="60" style="margin-top:-8px; float:left; margin-bottom:2px;"/></a>
+                            <a target="_blank" href = "https://jira.corp.inmobi.com/login.jsp" class="btn btn-success" style="background-color:#008acb; float:right; margin-bottom:10px; margin-right:0px;"><b>Raise a Bug</b></a>
+                        </div>
+
+                </div>
+            </form>
+        </div><!-- /.container -->                             
+    </div><!-- /.navbar -->
+    <div class="container" style="height:1640px; margin-right:0; margin-left: 14%; padding: 0;">  
+    <div class="row row-offcanvas row-offcanvas-right">
+            <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar" role="complementary">
+                <div class="list-group" style="margin-top:5%; margin-left:-9%; width:200px; position:fixed;">
+                    <b><a class="list-group-item" data-hide="r_docusign,r_io,r_internal,r_freetrial,r_makegood,r_positive,r_negative,r_childio,r_Placement,r_opportunity,error,Negative_IO_,Positive_IO_,Child_IO_,MakeGood_IO_,FreeTrial_IO_,Internal_IO_,negative_io,negative_io_create,negative_io_cancel,negative_io_amount,positive_io,positive_io_submit,positive_io_create,positive_io_cancel,makegood_io,makegood_io_cancel,makegood_io_submit,freetrial_io,freetrial_io_cancel,freetrial_io_submit,internal_io,internal_io2,internal_io_cancel,child_io,child_io_cancel,child_io_map,cancel_io,prepay_io,generate_io,upload_io,map_io,submit_for_app,agency_commission,unmap_io,unlock_io,cpl_io,generate_no_io,conversion_io,amount_edit_io,Docusign_video,Docusign_account,Docusign_io,Placement_delete,Placement_budget,amend_placement,currency_placement,new_placement,cancel_opp,admin_closed_opp,amount_opp,video,other_IO" data-show="account_currency,account_type,account_type2,docusign_account,parent_account,billing_account,billingcity_account,user_last_name,wrongmap_account,map_account,delink_account,add_to_acc,r_Account" id="Account_">Account&nbsp;&nbsp;&nbsp;&nbsp;<Font style="text-align:right;">(12)</font></a></b>
+                    <b><a class="list-group-item" data-hide="r_docusign,r_io,r_internal,r_freetrial,r_makegood,r_positive,r_negative,r_childio,r_Placement,r_Account,error,Negative_IO_,Positive_IO_,Child_IO_,MakeGood_IO_,FreeTrial_IO_,Internal_IO_,negative_io,negative_io_create,negative_io_cancel,negative_io_amount,positive_io,positive_io_submit,positive_io_create,positive_io_cancel,makegood_io,makegood_io_cancel,makegood_io_submit,freetrial_io,freetrial_io_cancel,freetrial_io_submit,internal_io,internal_io2,internal_io_cancel,child_io,child_io_cancel,child_io_map,cancel_io,prepay_io,generate_io,upload_io,map_io,submit_for_app,agency_commission,unmap_io,unlock_io,cpl_io,generate_no_io,conversion_io,amount_edit_io,account_currency,account_type,account_type2,docusign_account,parent_account,billing_account,billingcity_account,user_last_name,wrongmap_account,delink_account,map_account,add_to_acc,Docusign_video,Docusign_account,Docusign_io,Placement_delete,Placement_budget,amend_placement,currency_placement,new_placement,video,other_IO" data-show="admin_closed_opp,amount_opp,cancel_opp,r_opportunity" id="Opportunity_">Opportunity&nbsp;&nbsp;&nbsp;&nbsp;(3)</a></b>               
+                    <b><a class="list-group-item active" data-hide="r_docusign,r_internal,r_freetrial,r_makegood,r_positive,r_negative,r_childio,r_Placement,r_Account,r_opportunity,error,negative_io,negative_io_create,negative_io_cancel,negative_io_amount,positive_io,positive_io_submit,positive_io_create,positive_io_cancel,makegood_io,makegood_io_cancel,makegood_io_submit,freetrial_io,freetrial_io_cancel,freetrial_io_submit,internal_io,internal_io2,internal_io_cancel,child_io,child_io_cancel,child_io_map,cancel_opp,admin_closed_opp,amount_opp,account_currency,account_type,account_type2,docusign_account,parent_account,billing_account,billingcity_account,user_last_name,wrongmap_account,delink_account,map_account,add_to_acc,Docusign_video,Docusign_account,Docusign_io,Placement_delete,Placement_budget,amend_placement,currency_placement,new_placement,cancel_opp,admin_closed_opp,amount_opp,video"   data-show="Negative_IO_,Positive_IO_,Child_IO_,MakeGood_IO_,FreeTrial_IO_,Internal_IO_,submit_for_app,generate_no_io,generate_io,unlock_io,amount_edit_io,map_io,upload_io,cancel_io,prepay_io,agency_commission,unmap_io,cpl_io,conversion_io,other_IO,r_io" id="Insertion_Order_" >Insertion Order&nbsp;&nbsp;&nbsp;&nbsp;(13)</a></b>                  
+                    <b><a class="list-group-item hidden-div in" data-hide="r_docusign,r_io,r_internal,r_freetrial,r_makegood,r_positive,r_childio,r_Placement,r_Account,r_opportunity,positive_io,positive_io_submit,positive_io_create,positive_io_cancel,child_io,child_io_cancel,child_io_map,makegood_io,makegood_io_cancel,makegood_io_submit,freetrial_io,freetrial_io_cancel,freetrial_io_submit,internal_io,internal_io2,internal_io_cancel,cancel_io,prepay_io,generate_io,upload_io,map_io,submit_for_app,agency_commission,unmap_io,unlock_io,cpl_io,generate_no_io,conversion_io,amount_edit_io,account_currency,account_type,account_type2,docusign_account,parent_account,billing_account,billingcity_account,user_last_name,wrongmap_account,delink_account,map_account,add_to_acc,Placement_delete,Placement_budget,amend_placement,currency_placement,new_placement,cancel_opp,admin_closed_opp,amount_opp,other_IO,Docusign_video,Docusign_account,Docusign_io,video" data-show="negative_io,negative_io_create,negative_io_cancel,negative_io_amount,other_IO,r_negative," id="Negative_IO_">Negative IO&nbsp;&nbsp;&nbsp;&nbsp;(4)</a></b>    
+                    <b><a class="list-group-item hidden-div in" data-hide="r_docusign,r_io,r_internal,r_freetrial,r_makegood,r_negative,r_childio,r_Placement,r_Account,r_opportunity,negative_io,negative_io_create,negative_io_cancel,negative_io_amount,makegood_io,makegood_io_cancel,makegood_io_submit,freetrial_io,freetrial_io_cancel,freetrial_io_submit,internal_io,internal_io2,internal_io_cancel,child_io,child_io_cancel,child_io_map,cancel_io,prepay_io,generate_io,upload_io,map_io,submit_for_app,agency_commission,unmap_io,unlock_io,cpl_io,generate_no_io,conversion_io,amount_edit_io,account_currency,account_type,account_type2,docusign_account,parent_account,billing_account,billingcity_account,user_last_name,wrongmap_account,delink_account,map_account,add_to_acc,Placement_delete,Placement_budget,amend_placement,currency_placement,new_placement,cancel_opp,admin_closed_opp,amount_opp,other_IO,Docusign_video,Docusign_account,Docusign_io,video" data-show="positive_io,positive_io_submit,positive_io_create,positive_io_cancel,other_IO,r_positive," id="Positive_IO_">Positive IO&nbsp;&nbsp;&nbsp;&nbsp;(4)</a></b>    
+                    <b><a class="list-group-item hidden-div in" data-hide="r_docusign,r_io,r_internal,r_freetrial,r_makegood,r_positive,r_negative,r_Placement,r_Account,r_opportunity,negative_io,negative_io_create,negative_io_cancel,negative_io_amount,positive_io,positive_io_submit,positive_io_create,positive_io_cancel,makegood_io,makegood_io_cancel,makegood_io_submit,freetrial_io,freetrial_io_cancel,freetrial_io_submit,internal_io,internal_io2,internal_io_cancel,cancel_io,prepay_io,generate_io,upload_io,map_io,submit_for_app,agency_commission,unmap_io,unlock_io,cpl_io,generate_no_io,conversion_io,amount_edit_io,account_currency,account_type,account_type2,docusign_account,parent_account,billing_account,billingcity_account,user_last_name,wrongmap_account,delink_account,map_account,add_to_acc,Placement_delete,Placement_budget,amend_placement,currency_placement,new_placement,cancel_opp,admin_closed_opp,amount_opp,other_IO,Docusign_video,Docusign_account,Docusign_io,video" data-show="child_io,child_io_cancel,child_io_map,other_IO,r_childio" id="Child_IO_">Child IO&nbsp;&nbsp;&nbsp;&nbsp;(3)</a></b>   
+                    <b><a class="list-group-item  hidden-div in" data-hide="r_docusign,r_io,r_internal,r_freetrial,r_positive,r_negative,r_childio,r_Placement,r_Account,r_opportunity,negative_io,negative_io_create,negative_io_cancel,negative_io_amount,positive_io,positive_io_submit,positive_io_create,positive_io_cancel,freetrial_io,freetrial_io_cancel,freetrial_io_submit,internal_io,internal_io2,internal_io_cancel,child_io,child_io_cancel,child_io_map,cancel_io,prepay_io,generate_io,upload_io,map_io,submit_for_app,agency_commission,unmap_io,unlock_io,cpl_io,generate_no_io,conversion_io,amount_edit_io,account_currency,account_type,account_type2,docusign_account,parent_account,billing_account,billingcity_account,user_last_name,wrongmap_account,delink_account,map_account,add_to_acc,Placement_delete,Placement_budget,amend_placement,currency_placement,new_placement,cancel_opp,admin_closed_opp,amount_opp,other_IO,Docusign_video,Docusign_account,Docusign_io,video" data-show="makegood_io,makegood_io_cancel,makegood_io_submit,other_IO,r_makegood" id="MakeGood_IO_">Make Good IO&nbsp;&nbsp;&nbsp;&nbsp;(3)</a></b>
+                    <b><a class="list-group-item hidden-div in" data-hide="r_docusign,r_io,r_internal,r_makegood,r_positive,r_negative,r_childio,r_Placement,r_Account,r_opportunity,negative_io,negative_io_create,negative_io_cancel,negative_io_amount,positive_io,positive_io_submit,positive_io_create,positive_io_cancel,makegood_io,makegood_io_cancel,makegood_io_submit,internal_io,internal_io2,internal_io_cancel,child_io,child_io_cancel,child_io_map,cancel_io,prepay_io,generate_io,upload_io,map_io,submit_for_app,agency_commission,unmap_io,unlock_io,cpl_io,generate_no_io,conversion_io,amount_edit_io,account_currency,account_type,account_type2,docusign_account,parent_account,billing_account,billingcity_account,user_last_name,wrongmap_account,delink_account,map_account,add_to_acc,Placement_delete,Placement_budget,amend_placement,currency_placement,new_placement,cancel_opp,admin_closed_opp,amount_opp,other_IO,Docusign_video,Docusign_account,Docusign_io,video" data-show="freetrial_io,freetrial_io_cancel,freetrial_io_submit,other_IO,r_freetrial" id="FreeTrial_IO_">Free Trial IO&nbsp;&nbsp;&nbsp;&nbsp;(3)</a></b>
+                    <b><a class="list-group-item hidden-div in" data-hide="r_docusign,r_io,r_freetrial,r_makegood,r_positive,r_negative,r_childio,r_Placement,r_Account,r_opportunity,negative_io,negative_io_create,negative_io_cancel,negative_io_amount,positive_io,positive_io_submit,positive_io_create,positive_io_cancel,makegood_io,makegood_io_cancel,makegood_io_submit,freetrial_io,freetrial_io_cancel,freetrial_io_submit,child_io,child_io_cancel,child_io_map,cancel_io,prepay_io,generate_io,upload_io,map_io,submit_for_app,agency_commission,unmap_io,unlock_io,cpl_io,generate_no_io,conversion_io,amount_edit_io,account_currency,account_type,account_type2,docusign_account,parent_account,billing_account,billingcity_account,user_last_name,wrongmap_account,delink_account,map_account,add_to_acc,Placement_delete,Placement_budget,amend_placement,currency_placement,new_placement,cancel_opp,admin_closed_opp,amount_opp,other_IO,Docusign_video,Docusign_account,Docusign_io,video" data-show="internal_io,internal_io2,internal_io_cancel,other_IO,r_internal" id="Internal_IO_">Internal IO&nbsp;&nbsp;&nbsp;&nbsp;(3)</a></b>
+                    <b><a class="list-group-item" data-hide="r_docusign,r_io,r_internal,r_freetrial,r_makegood,r_positive,r_negative,r_childio,r_Account,r_opportunity,error,Negative_IO_,Positive_IO_,Child_IO_,MakeGood_IO_,FreeTrial_IO_,Internal_IO_,negative_io,negative_io_create,negative_io_cancel,negative_io_amount,positive_io,positive_io_submit,positive_io_create,positive_io_cancel,makegood_io,makegood_io_cancel,makegood_io_submit,freetrial_io,freetrial_io_cancel,freetrial_io_submit,internal_io,internal_io2,internal_io_cancel,child_io,child_io_cancel,child_io_map,cancel_io,prepay_io,generate_io,upload_io,map_io,submit_for_app,agency_commission,unmap_io,unlock_io,cpl_io,generate_no_io,conversion_io,amount_edit_io,account_currency,account_type,account_type2,docusign_account,parent_account,billing_account,billingcity_account,user_last_name,wrongmap_account,delink_account,map_account,add_to_acc,Docusign_video,Docusign_account,Docusign_io,cancel_opp,admin_closed_opp,amount_opp,video,other_IO" data-show="Placement_delete,Placement_budget,amend_placement,currency_placement,new_placement,r_Placement" id="Placement_">Placement&nbsp;&nbsp;&nbsp;&nbsp;(5)</a> </b>
+                    <b><a class="list-group-item" data-hide="r_io,r_internal,r_freetrial,r_makegood,r_positive,r_negative,r_childio,r_Placement,r_Account,r_opportunity,error,Negative_IO_,Positive_IO_,Child_IO_,MakeGood_IO_,FreeTrial_IO_,Internal_IO_,negative_io,negative_io_create,negative_io_cancel,negative_io_amount,positive_io,positive_io_submit,positive_io_create,positive_io_cancel,makegood_io,makegood_io_cancel,makegood_io_submit,freetrial_io,freetrial_io_cancel,freetrial_io_submit,internal_io,internal_io2,internal_io_cancel,child_io,child_io_cancel,child_io_map,cancel_io,prepay_io,generate_io,upload_io,map_io,submit_for_app,agency_commission,unmap_io,unlock_io,cpl_io,generate_no_io,conversion_io,amount_edit_io,account_currency,account_type,account_type2,docusign_account,parent_account,billing_account,billingcity_account,user_last_name,wrongmap_account,delink_account,map_account,add_to_acc,Placement_delete,Placement_budget,amend_placement,currency_placement,new_placement,cancel_opp,admin_closed_opp,amount_opp,other_IO" data-show="Docusign_video,Docusign_account,Docusign_io,r_docusign" id="Docusign_">Docusign&nbsp;&nbsp;&nbsp;&nbsp;(3)</a></b>                    
+                    <b><a class="list-group-item hidden-div in" style="cursor:pointer;"  onMouseOver="this.style.background-color='black'" target="_blank" href = "https://drive.google.com/a/inmobi.com/folderview?id=0B1B40MQZ54aMXzFmNVp3dU9iREk&usp=sharing" id="video">Docusign Videos  </a></b>                                       
+                    <b><a class="list-group-item" style="cursor:pointer;"  target="_blank" href = "https://one.inmobi.com/edge/operations/businessoperations/salesforce/" id="training_">Training Videos</a></b>                   
+                    <br/>
+                    <div id="info"></div> 
+                </div>
+            </div><!--/span-->
+        <div class="col-xs-12 col-sm-9" style="margin-left:-15%; margin-top:5%;">
+            <h3 style="float:left; margin-top: -5%; margin-bottom:1%; margin-left: 29%; color:black;">Salesforce Self-Help</h3>
+                <div id="expandcoll" style="float:right; display:none;"><b><a id="expand" style="margin-left:-108%;" href="#">Expand All</a>&nbsp;|&nbsp;<a id="collapse" href="#">Collapse All</a></b></div>
+                <div id="IO" style="margin-left:5%;">
+                <div>    
+                    <div id="child_io" style="margin-top:15px;" class="btn btn-default col-xs-10 .col-md-8 hidden-div even" href="#child_io1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Create a Child IO</h5>
+                        <div id="child_io1" class="panel-collapse collapse note e"  style="white-space: normal; ">
+                                    <ol><li type="1"><div>Child IO can be created only on the Standard IO.</div></li></ol>                                      
+                                    <div class="inside"><ol><li type="a"><div>IO Status of the Standard IO should be Signed.</div></li>
+                                    <li type="a"><div>Standard IO should be not be mapped to network/admin.</div></li></ol></div>                               
+                                    <ol><li type="1" value="2"><div>Go the Amendment IO section on the IO page and click on the New Child IO button.</div></li>
+                                    <li><div>On the Child IO page, click Select Placement button and link the Child IO to the required placement (NOTE: The placements fetched are the placements created on the main Standard IO. So, the number of Child IOs you are going to create should be equal to the number of placements will create on the main IO).</div></li>
+                                    <li><div>Once you save after linking the Child IO to a placement, you will get the valid Child IO number.</div></li>
+                                    <li><div>Use the Map to Network ID button on the Child IO to map the Child IO with the Network/Admin account.</div></li>
+                                    <li><div>Once you have mapped the Child IO, click on the Upload Child IO button.</div></li></ol>
+                                    
+                        </div>
+                    </div><!--/span-->   
+
+                    <div id="child_io_map" class="btn btn-default col-xs-10 .col-md-8 hidden-div odd" href="#child_io_map1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Cannot map Child IO</h5>                         
+                        <div id="child_io_map1" class="panel-collapse collapse note o"  style="white-space: normal; ">
+                                    
+                                        <ol><li type="1"><div>Please make sure that the related account is already mapped with Network/Admin account.</div></li>
+                                        <li><div>Click Map to Network ID button on the Child IO.</div></li></ol>
+                                        <div class="inside"><ol><li type="a"><div>If the IO needs to be mapped with the same account to which the related SF Account is mapped.</div></li>
+                                        <li type="a"><div>Please make sure that the Account Type is Advertiser (Agency accounts should be mapped with Shell Account of Network on which IO can not be uploaded).</div></li>
+                                        <li type="a"><div>Click on Mapped Network Ids button and choose the Network/Admin Account to which you want to map the IO.</div></li></ol></div>                                    
+                                        <ol><li type="1" value="3"><div>If you want to map the IO to a new Network/Admin account which has not been mapped to any other IO/SF Account, then enter the Network Account Email ID and click Search.</div></li></ol>
+                                        <div class="inside"><ol><li type="a"><div>Based on the response, select the checkbox against the Network/Admin Account to which IO needs to be uploaded and click Confirm.</div></li>
+                                        <li type="a"><div>If the response says ""No Data Found"" or blank, then please make sure that the Network/Admin Account you are searching is not already mapped to some other SF Account/IO.</div></li>
+                                        <li type="a"><div>Also make sure that the Network/Admin Account you are searching is not marked as a Child Account of some other Account in Network/Admin.</div></li></ol></div>                                        
+                                    
+                        </div>
+                    </div><!--/span--> 
+
+                    <div id="child_io_cancel" class="btn btn-default col-xs-10 .col-md-8 hidden-div even" href="#child_io_cancel1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Cancel Child IO</h5>                         
+                        <div id="child_io_cancel1" class="panel-collapse collapse note e"  style="white-space: normal; ">
+                                    <ol><li type="1"><div>If the Child IO is not yet uploaded to Network/Admin, then please raise a bug in Jira for SF team and we will do the needful.</div></li>
+                                    <li><div>If the Child IO is uploaded to Network/Admin, then please create a Negative Revision IO on the Child IO and upload the same to remove the funds transferred by the Child IO to Network/Admin account.</div></li></ol>
+                                                                        
+                        </div>
+                    </div><!--/span-->  
+                    <div id="r_childio" class="hidden-div vdeo" style="background-color:#D4D4D4; float:left; margin-left:-83%; margin-top:20px; margin-bottom:10px;"><br/><br/><br/><br/><br/><br/><br/><br/> 
+                    <b><b>Related Videos</b></b><br/>
+                    <b><a  target="_blank" href="https://one.inmobi.com/edge/wp-content/uploads/sites/12/2014/02/How-to-create-a-child-IOvideo-11.mp4">How to create Child IO</a></b>
+                    </div>
+                    
+                    <div id="negative_io_create"  style="margin-top:15px;" class="btn btn-default col-xs-10 .col-md-8 hidden-div odd" href="#negative_io_create1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>How to create Negative IO?</h5>                         
+                        <div id="negative_io_create1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                    <ol><li type="1"><div>Negative Revision IO can be created on the IO which is already uploaded to Network/Admin.</div></li>
+                                    <li><div>Go to the main IO page on which you want to create Negative Revision IO.</div></li>
+                                    <li><div>In the Amendment IO section, you will find a button Negative IO. Click that button and choose a placement(if its mandatory) from the main IO. Click Save.</div></li>
+                                    <li><div>After saving, you will need to attach a document mentioning the reason for creating Negative IO. The document needs to be attached to the Negative IO itself in the Attachment section.</div></li>
+                                    <li><div>On attaching the document, you will get a valid IO number and an option to upload the Negative IO.</div></li>
+                                    <li><div>Click on the Upload Negative Amendment button.</div></li></ol><br/>
+                                        
+                                    <b>Note :</b><br/>
+                                    <ol><li type="1"><div>Negative Revision IO does not require any approval.</div></li>
+                                    <li><div>Amount of Negative Revision should be decided based on the total IO amount which is not yet burnt. Negative IO amount should not be more than the IO amount which is not yet burnt.</div></li>
+                                    <li><div>To know the exact burn details of the main IO, you can go to the main IO page and click Synchronize Burn button. In the Ad Network Information section of the IO, you will get the current Burn details.</div></li>
+                                    <li><div>Before uploading Negative Revision IO, please make sure that you have enough balance in the Account Dashboard on the Network/Admin.</div></li>
+                                    <li><div>Negative Revision IO can not be uploaded if the main IO is already Completed.</div></li></ol>
+                                    
+                        </div>
+                    </div><!--/span--> 
+                    
+                    <div id="negative_io" class="btn btn-default col-xs-10 .col-md-8 hidden-div even" href="#negative_io1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Unable to upload Negative IO</h5>                         
+                        <div id="negative_io1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                    <ol><li type="1"><div>Negative Revision IO can not be uploaded if the main IO is already Completed.</div></li>
+                                    <li><div>Before uploading the Negative Revision IO, please make sure that there is enough funds available in the Account Dashboard on Network/Admin.</div></li>
+                                    <li><div>If the available funds in the Account Dashboard on Network/Admin is less that the Negative Revision amount.</div></li></ol>                                       
+                                    <div class="inside"><ol><li type="a"><div>then you will need to move the unspent budget from the campaigns to the Account Dashboard on Network/Admin and then upload the Negative Revision IO.</div></li></ol></div>
+                                        
+                        </div>
+                    </div><!--/span-->                   
+ 
+                    <div id="negative_io_amount" class="btn btn-default col-xs-10 .col-md-8 hidden-div odd" href="#negative_io_amount1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>How to calculate the Negative Revision amount?</h5>                         
+                        <div id="negative_io_amount1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                    <ol><li type="1"><div>Maximum Negative Revision amount allowed = Net IO Value (on Network) - IO Total Burn.</div></li></ol>                                  
+                                    <div class="inside"><ol><li type="a"><div>Please click on Synchronize Burn button on the main IO to update the current burn details of main IO before creating Negative Revision.</div></li>
+                                    <li type="a"><div>The amount calculated in the above formula is in USD currency.</div></li>
+                                    <li type="a"><div>If your IO currency is not USD, then you will need to convert the calculated USD amount in IO currency amount and create the Negative Revision with the same amount.</div></li></ol></div>                                  
+                        </div>
+                    </div><!--/span--> 
+ 
+                    <div id="negative_io_cancel" class="btn btn-default col-xs-10 .col-md-8 hidden-div even" href="#negative_io_cancel1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Cancel the Negative IO</h5>                         
+                        <div id="negative_io_cancel1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                    <ol><li type="1"><div>Negative IO can be Cancelled only if it is not yet uploaded.</div></li></ol>
+                                    <div class="inside"><ol><li type="a"><div>If the Negative IO is not yet uploaded, please raise a bug in Jira for SF team and we will do the needful.</div></li></ol></div>
+                        </div>
+                    </div><!--/span--><br/>
+                    <div id="r_negative" class="hidden-div vdeo" style="background-color:#D4D4D4; float:left; margin-left:-83%; margin-top:20px; margin-bottom:10px;"><br/><br/><br/><br/><br/><br/><br/><br/> 
+                    <b>Related Videos</b><br/>
+                    <b><a  target="_blank" href="https://one.inmobi.com/edge/wp-content/uploads/sites/12/2014/02/negative-IO-video-19.mp4">Negative IO</a></b>
+                    </div>
+                    
+                    <div id="positive_io_create" class="btn btn-default col-xs-10 .col-md-8 hidden-div odd" href="#positive_io_create1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>How do I create Positive IO?</h5>                         
+                        <div id="positive_io_create1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                    <ol><li type="1"><div>Positive Revision IO can be created on the IO which is already uploaded to Network/Admin.</div></li>
+                                    <li><div>Go to the main IO page on which you want to create Positive Revision IO.</div></li>
+                                    <li><div>In the Amendment IO section, you will find a button Positive IO.</div></li></ol>
+                                    <div class="inside"><ol><li type="a"><div>Click that button and choose a placement(if its mandatory) from the main IO. Click Save.</div></li></ol></div>                                  
+                                    <ol><li type="1" value="4"><div>If the Positive IO amount is greater than the Credit Available on the related Account in SF, then you will need to submit the Positive Revision IO for finance approval who will increase the Credit Limit on the Account.</div></li>
+                                    <li><div>Once the Positive Revision IO is approved, you will need to attach a document mentioning the reason for creating Positive IO. The document needs to be attached to the Positive IO itself in the Attachment section.</div></li>
+                                    <li><div>On attaching the document, you will get a valid IO number and an option to upload the Positive IO.</div></li>
+                                    <li><div>Click on the Upload Positive Amendment button.</div></li></ol>
+                                    <br/><b>Note :</b><br/>Positive Revision IO can not be uploaded to Network/Admin if the main IO is burnt completelty (i.e IO Status is Completed).<br/>
+                                    To know the exact burn details of the main IO, you can go to the main IO page and click Synchronize Burn button which will update the IO Status with current value.<br/>
+                                    
+                        </div>
+                    </div><!--/span-->
+ 
+                    <div id="positive_io_submit" class="btn btn-default col-xs-10 .col-md-8 hidden-div even" href="#positive_io_submit1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Not able to submit Positive IO</h5>                         
+                        <div id="positive_io_submit1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                    <ol><li type="1"><div>Positive Revision IO needs to be submitted only when the Positive Credit Check field is marked as Approval Required.</div></li></ol>                                     
+                                    <br/><b>Note :</b><br/>Positive Credit Check field on Positive Revision IO is marked as Approval Required only if the Positive Revision amount is greater than the Credit Available on the related Account.<br/>
+                                    
+                        </div>
+                    </div><!--/span-->   
+ 
+                    <div id="positive_io" class="btn btn-default col-xs-10 .col-md-8 hidden-div odd" href="#positive_io1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Unable to Upload Positive IO</h5>                         
+                        <div id="positive_io1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                    <ol><li type="1"><div>If the Positive Credit Check fields is marked as Approval Required, please submit the Positive Revision IO for approval. Once Approved by finance, you should be able to upload it.</div></li>
+                                    <li><div>Positive Revision IO can not be uploaded if the main IO is already Completed.</div></li></ol>                                
+                                    
+                        </div>
+                    </div><!--/span-->   
+                  
+                    
+                    <div id="positive_io_cancel" class="btn btn-default col-xs-10 .col-md-8 hidden-div even" href="#positive_io_cancel1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Cancel Positive IO</h5>                         
+                        <div id="positive_io_cancel1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                    
+                                    <ol><li type="1"><div>Positive Revision IO can be Cancelled only if it is not yet uploaded.</div></li></ol> 
+                                    <div class="inside"><ol><li type="a"><div>If the Positive Revision IO is not yet uploaded, please raise a bug in Jira for SF team and we will do the needful.</div></li></ol></div>
+                                    <ol><li type="1" value="2"><div>If the Positive Revision IO is already uploaded, then you will need to create a Negative Revision IO of the same amount on the same main IO on which Positive Revision was created.</div></li></ol> 
+                                    <div class="inside"><ol><li type="a"><div>Once you upload this Negative Revision IO, it will remove the funds from Network/Admin Account, which were added by the Positive Revision IO.</div></li></ol></div>
+                        </div>
+                    </div><!--/span-->    
+                    <div id="r_positive" class="hidden-div vdeo" style="background-color:#D4D4D4; float:left; margin-left:-83%; margin-top:20px; margin-bottom:10px;"><br/><br/><br/><br/><br/><br/><br/><br/> 
+                    <b>Related Videos</b><br/>
+                    <b><a  target="_blank" href="https://one.inmobi.com/edge/wp-content/uploads/sites/12/2014/02/positive-IO-video-18.mp4">Positive IO</a></b>
+                    </div>
+                    
+                    <div id="makegood_io" class="btn btn-default col-xs-10 .col-md-8 hidden-div odd" href="#makegood_io1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>How do I create a Make Good IO?</h5>                         
+                        <div id="makegood_io1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                    <ol><li type="1"><div>Make Good IO can be created on the Standard/Child IO.</div></li>
+                                    <li><div>On the main IO page, go to the Amendment IO section and click on the New Make Good button.</div></li>
+                                    <li><div>Once you have created  the Make Good IO, you will need to Submit the IO for Approval ( All Make Good IOs are subjected for Approval).</div></li>
+                                    <li><div>Once the Make Good IO is approved, you will need to Generate the IO and attach the document to the same IO in the attachment section.</div></li>
+                                    <li><div>After this you will get the valid IO number.</div></li>
+                                    <li><div>Then, you can map the Make Good IO to the Network/Admin account and upload the same.</div></li></ol>                                  
+                                    
+                        </div>
+                    </div><!--/span-->            
+
+                    <div id="makegood_io_submit" class="btn btn-default col-xs-10 .col-md-8 hidden-div even" href="#makegood_io_submit1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Not able to Submit the Make Good lO</h5>                         
+                        <div id="makegood_io_submit1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                    <ol><li type="1"><div>All Make Good IOs are subjected to Approval.</div></li>
+                                    <li><div>Only the user who has created the Make Good IO or the related Opportunity Owner can submit the Make Good IO for Approval.</div></li>                 
+                                    <li><div>When all flags are green for the Make Good IO please attach a signed document.</div></li>
+                                    <li><div>Please enter the Special Term Reasons field before submitting the Make Good IO for approval.</div></li></ol>
+                                    <div class="inside"><ol><li type="a"><div>If you are still not able to submit the IO for Approval, please raise a bug in bigzilla for SF team and we will look into the issue.</div></li></ol></div>
+                                    
+                        </div>
+                    </div><!--/span-->  
+
+
+                    <div id="makegood_io_cancel" class="btn btn-default col-xs-10 .col-md-8 hidden-div odd" href="#makegood_io_cancel1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Cancel Make Good IO</h5>                         
+                        <div id="makegood_io_cancel1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                    <ol><li type="1"><div>If the Make Good IO is not yet uploaded to Network/Admin, then raise a bug in Jira for the SF team and we will do the needful.</div></li>
+                                    <li><div>If the Make Good IO is already uploaded to Network/Admin, then you will need to create a Negative Revision IO on the Make Good IO and upload the same.</div></li></ol>
+                                    <div class="inside"><ol><li type="a"><div>Once you upload the Negative Revision IO, funds transferred via Make Good IO will be removed from the Network/Admin account.</div></li></ol></div>
+                                    
+                        </div>
+                    </div><!--/span-->                  
+                    <div id="r_makegood" class="hidden-div vdeo" style="background-color:#D4D4D4; float:left; margin-left:-83%; margin-top:20px; margin-bottom:10px;"><br/><br/><br/><br/><br/><br/><br/><br/> 
+                    <b>Related Videos</b><br/>
+                    <b><a  target="_blank" href="https://one.inmobi.com/edge/wp-content/uploads/sites/12/2014/02/Make-good-IO-video-12.mp4">Make good IO</a></b>
+                    </div>
+                    
+                    <div id="freetrial_io" class="btn btn-default col-xs-10 .col-md-8 hidden-div even" href="#freetrial_io1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>How to create a Free Trial?</h5>                         
+                        <div id="freetrial_io1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                    <ol><li type="1"><div>On the Opportunity page, go to Insertion Order section and click New Insertion Order button.</div></li>
+                                    <li><div>Select Free Trial IO type from the picklist and enter all the details on the Free Trial IO page.</div></li>
+                                    <li><div>If Free Trial IO amount is already Approved, then Generate the Free Trial IO and attach a document to the IO in its Attachment Section.</div></li></ol>
+                                    <div class="inside"><ol><li type="a"><div>If Free Trial IO amount is Not Approved, then Submit the IO for approval. Once the Free Trial IO is approved, Generate the IO and attach a document to the IO in its Attachment Section.</div></li></ol></div> 
+                                    <ol><li type="1" value="4"><div>After this, you will get the Valid IO number.</div></li>
+                                    <li><div>Then, you can map the Make Good IO to the Network/Admin account and upload the same.</div></li></ol>                                                                   
+                        </div>
+                    </div><!--/span-->   
+
+                    <div id="freetrial_io_submit" class="btn btn-default col-xs-10 .col-md-8 hidden-div odd" href="#freetrial_io_submit1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Not able to Submit the Free Trial lO</h5>                         
+                        <div id="freetrial_io_submit1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                    <ol><li type="1"><div>Free Trial IO will only need approval when the Free Trial IO's amount exceeds the Credit Available amount.</div></li></ol>
+                                    <div class="inside"><ol><li type="a"><div>If any flag is red please submit the Free Trial IO for approval.</div></li></ol></div>                                                           
+                                    <ol><li type="1" value="2"><div>When all flags are green for the Free Trial IO please attach a signed document.</div></li></ol>
+                                    <div class="inside"><ol><li type="a"><div>On attaching the document, IO status will be changed to Signed and you can upload the Free Trial IO.</div></li></ol></div>                                   
+                        </div>
+                    </div><!--/span--> 
+
+                    <div id="freetrial_io_cancel" class="btn btn-default col-xs-10 .col-md-8 hidden-div even" href="#freetrial_io_cancel1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Cancel Free Trial</h5>                         
+                        <div id="freetrial_io_cancel1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                    <ol><li type="1"><div>If the Free Trial IO is not yet uploaded to Network/Admin, then raise a bug in Jira for the SF team and we will do the needful.</div></li>
+                                    <li><div>If the Free Trial IO is already uploaded to Network/Admin, then you will need to create a Negative Revision IO on the Free Trial IO and upload the same.</div></li></ol>
+                                    <div class="inside"><ol><li type="a"><div>Once you upload the Negative Revision IO, funds transferred via Free Trial IO will be removed from the Network/Admin account.</div></li></ol></div>
+                        </div>
+                    </div><!--/span-->                  
+                    <div id="r_freetrial" class="hidden-div vdeo" style="background-color:#D4D4D4; float:left; margin-left:-83%; margin-top:20px; margin-bottom:10px;"><br/><br/><br/><br/><br/><br/><br/><br/> 
+                    <b>Related Videos</b><br/>
+                    <b><a  target="_blank" href="https://one.inmobi.com/edge/wp-content/uploads/sites/12/2014/02/How-to-create-a-free-trial-IO-video-14.mp4">Free Trial IO</a></b>
+                    </div>
+                    
+                    <div id="internal_io" class="btn btn-default col-xs-10 .col-md-8 hidden-div odd" href="#internal_io1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>How to create a Internal IO?</h5>                         
+                        <div id="internal_io1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                    <ol><li type="1"><div>On the Opportunity page, go to Insertion Order section and click New Insertion Order button.</div></li>
+                                    <li><div>Select Internal IO type from the picklist and enter all the details on the Internal IO page.</div></li>
+                                    <li><div>If Internal IO amount is already Approved, then attach a document to the IO in its Attachment Section.</div></li></ol>
+                                    <div class="inside"><ol><li type="a"><div>If Internal IO amount is Not Approved, then Submit the IO for approval.</div></li>
+                                    <li type="a"><div>Once the Internal IO is approved, Generate the IO and attach a document to the IO in its Attachment Section.</div></li></ol></div>
+                                    <ol><li type="1" value="4"><div>After this, you will get the Valid IO number.</div></li>
+                                    <li><div>Then, you can map the Internal IO to the Network/Admin account and upload the same.</div></li></ol>                                                               
+                                    <br/><b>Note:</b> <br/>
+                                    All the Internal IOs are subjected for approval, irrespective of amount.<br/>                                    
+                        </div>
+                    </div><!--/span-->   
+                    
+                    <div id="internal_io2" class="btn btn-default col-xs-10 .col-md-8 hidden-div even" href="#internal_io3" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Not able to Submit the Internal IO</h5>                         
+                        <div id="internal_io3" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                    <ol><li type="1"><div>Internal IO needs to be submitted for Approval only if the Internal IO amount flag is red.</div></li>
+                                    <li><div>Only the user who has created the Internal IO or the related Opportunity Owner can submit the Internal IO for Approval.</div></li>                                                      
+                                    <li><div>Please enter the Special Term Reasons field before submitting the Internal IO for approval.</div></li></ol>
+                                    <div class="inside"><ol><li type="a"><div>If you are still not able to submit the IO for Approval, please raise a bug in Jira for SF team and we will look into the issue.</div></li></ol></div>
+                        </div>
+                    </div><!--/span-->         
+                    
+                    <div id="internal_io_cancel" class="btn btn-default col-xs-10 .col-md-8 hidden-div odd" href="#internal_io_cancel1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Cancel Internal IO</h5>                         
+                        <div id="internal_io_cancel1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                    <ol><li type="1"><div>If the Internal IO is not yet uploaded to Network/Admin, then raise a bug in Jira for the SF team and we will do the needful.</div></li>
+                                    <li><div>If the Internal IO is already uploaded to Network/Admin, then you will need to create a Negative Revision IO on the Internal IO and upload the same.</div></li></ol>
+                                    <div class="inside"><ol><li type="a"><div>Once you upload the Negative Revision IO, funds transferred via Internal IO will be removed from the Network/Admin account.</div></li></ol></div>
+
+                        </div>
+                    </div><!--/span-->  
+                    <div id="r_internal" class="hidden-div vdeo" style="background-color:#D4D4D4; float:left; margin-left:-83%; margin-top:20px; margin-bottom:10px;"><br/><br/><br/><br/><br/><br/><br/><br/> 
+                    <b>Related Videos</b><br/>
+                    <b><a  target="_blank" href="https://one.inmobi.com/edge/wp-content/uploads/sites/12/2014/02/How-to-generate-an-internal-IO-video-13.mp4">Internal IO</a></b>
+                    </div>
+                    
+                    <div id="prepay_io" class="btn btn-default col-xs-10 .col-md-8 hidden-div collapse odd" href="#prepay_io1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Please mark prepay IO as Signed</h5>                         
+                        <div id="prepay_io1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                    <ol><li type="1"><div>In case of Prepay IO, please attach the Email/Screenshot of payment confirmation from the finance team.</div></li>
+                                    <li><div>After attaching the proof to the IO, please raise a bug in Jira for SF team to mark the IO as Signed. We will do the needful.</div></li></ol>                                                                     
+                        </div>
+                    </div><!--/span-->   
+
+                    <div id="generate_no_io" class="btn btn-default col-xs-10 .col-md-8 hidden-div even" href="#generate_no_io1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Valid IO number is not generated for IO</h5>                         
+                        <div id="generate_no_io1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                    <ol><li type="1"><div>Please make sure that you have created placement on the IO.</div></li> 
+                                    <li><div>Please make sure that all the flags on the IO page i.e Credit Limit Status Flag, all flags under Team Approval Overview section on IO Page, are green.</div></li></ol>
+                                    <div class="inside"><ol><li type="a"><div>If the Credit Limit Status Flag is red, submit the IO for approval from finance to get the Credit Limit of the Account increased.</div></li>
+                                    <li type="a"><div>If any of the flags in the Team Approval Overview section on IO page is red, please enter the Special Term Reasons field on IO and submit for approval.</div></li></ol></div><br/>                              
+                                    Once you have all the required approvals, you will be able to Generate the valid IO number.
+                        </div>
+                    </div><!--/span-->  
+                    
+                    <div id="generate_io" class="btn btn-default col-xs-10 .col-md-8 hidden-div odd" href="#generate_io1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Not able to Generate IO</h5>                         
+                        <div id="generate_io1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                    <ol><li type="1"><div>Please make sure that you have created placement on the IO.</div></li>
+                                    <li><div>Please make sure that all the flags on the IO page i.e Credit Limit Status Flag, all flags under team approval overview section on IO page, are green.</div></li></ol>
+                                    <div class="inside"><ol><li type="a"><div>If the Credit Limit Status Flag is red, submit the IO for approval from finance to get the Credit Limit of the account increased.</div></li>
+                                    <li type="a"><div>If any of the flags in the team Approval Overview section on IO page is red, please enter the Special Term Reasons field on IO and submit for approval.</div></li></ol></div>
+                                    <ol><li type="1" value="3"><div>Once you have all the required approvals, you will be able to Generate the IO template.</div></li></ol>
+
+                        </div>
+                    </div><!--/span-->   
+                        
+                    <div id="cpl_io" class="btn btn-default col-xs-10 .col-md-8 hidden-div even" href="#cpl_io1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Please help to change the CPL from "Yes" to "No"</h5>                         
+                        <div id="cpl_io1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                    <ol><li type="1"><div>If the IO Status is Draft/Generated, you should be able to change it yourself.</div></li>
+                                    <li><div>If the IO Status is Signed, please get an approval email from Market Place team.</div></li>      
+                                    <li><div>Once you get the approval email from Market Place team, please raise a bug in Jira for SF team and attach the approval email in the bug. We will do the needful.</div></li></ol>                                        
+                        </div>
+                    </div><!--/span-->                                                         
+
+                    <div id="unlock_io" class="btn btn-default col-xs-10 .col-md-8 hidden-div odd" href="#unlock_io1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Unlock IO for editing</h5>                         
+                        <div id="unlock_io1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                    <ol><li type="1"><div>If you are not able to edit the IO since it is Locked after you have submitted it for approval, then please click the Recall Approval Request button in Approval History section of IO Page.</div></li></ol>
+                                    <div class="inside"><ol><li type="a"><div>Once you have recalled the approval request, you can edit the IO and then submit again for the required approvals.</div></li></ol></div>
+                                    <ol><li type="1" value="2"><div>If you are not able to change the IO details since the IO Status is Signed, then please raise a bug in Jira for SF team. We will do the needful.</div></li></ol>                            
+                        </div>
+                    </div><!--/span--> 
+                    
+                    <div id="map_io" class="btn btn-default col-xs-10 .col-md-8 hidden-div even" href="#map_io1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Unable to Map IO</h5>                         
+                        <div id="map_io1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                    <ol><li type="1"><div>Please make sure that the related account is already mapped with Network/Admin account.</div></li>
+                                    <li><div>Click Map to Network ID button on the IO.</div></li></ol>
+                                    <div class="inside"><ol><li type="a"><div>If the IO needs to be mapped with the same account to which the related SF Account is mapped, please make sure that the Account Type is Advertiser (Agency accounts should be mapped with Shell Account of Network on which IO can not be uploaded).</div></li>
+                                    <li type="a"><div>Click on Mapped Network Ids button and choose the Network/Admin Account to which you want to map the IO.</div></li></ol></div>
+                                    <ol><li type="1" value="3"><div>If you want to map the IO to a new Network/Admin account which has not been mapped to any other IO/SF account, then enter the Network Account Email ID and click Search.</div></li></ol>
+                                    <div class="inside"><ol><li type="a"><div>Based on the response, select the checkbox against the Network/Admin Account to which IO needs to be uploaded and click Confirm.</div></li>
+                                    <li type="a"><div>If the response says ""No Data Found"" or blank, then please make sure that the Network/Admin Account you are searching is not already mapped to some other SF account/IO.</div></li>
+                                    <li type="a"><div>Also make sure that the Network/Admin account you are searching is not marked as a Child account of some other account in Network/Admin.</div></li></ol></div>
+                                    <br/>If you are still not able to map the IO, please raise a bug in Jira for SF team and we will work on this.<br/>
+                        </div>
+                    </div><!--/span--> 
+                    
+                    <div id="upload_io" class="btn btn-default col-xs-10 .col-md-8 hidden-div odd" href="#upload_io1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Unable to Upload IO</h5>                         
+                        <div id="upload_io1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                    <ol><li type="1"><div>Please make sure that the IO Status is Signed and the IO has a valid IO number like IMRO*******.</div></li>
+                                    <li><div>Please make sure that the Credit Limit Status Flag field on IO page is green.</div></li>
+                                    <li><div>Please make sure that all the flags in Team Approval Overview are green.</div></li>
+                                    <li><div>Please ensure that the opportunity stage is Closed Won.</div></li>
+                                    <li><div>Please ensure that the IO is mapped.</div></li>
+                                    <li><div>Please make sure that if the Bill on CPI is marked as Yes, then it must have been approved by Market Place team.</div></li></ol>
+                        </div>
+                    </div><!--/span-->   
+                                   
+                    <div id="submit_for_app" class="btn btn-default col-xs-10 .col-md-8 hidden-div even" href="#submit_for_app1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Unable to Submit IO for Approval</h5>                         
+                        <div id="submit_for_app1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                    <ol><li type="1"><div>IO can be submitted only by the related Opportunity Owner or the user who has created the IO.</div></li>
+                                    <li><div>Please check the Document for Credit Check Attached checkbox field on IO. It should be checked.</div></li>
+                                    <li><div>If Advertiser Discount/Agency Commission/Payment Terms/Bonus Placement need approval, then please update the Special Term Reason field on the IO and then try to submit the IO for Approval.</div></li></ol>
+                                    <br/><b>Note :</b> Once the record is submitted for Approval, it will be locked. Please do not try to edit/perform any action on the IO till it is approved.
+                        </div>
+                    </div><!--/span-->                 
+                    <div id="agency_commission" class="btn btn-default col-xs-10 .col-md-8 hidden-div odd" href="#agency_commission1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Unable to Change Agency Commission</h5>                         
+                        <div id="agency_commission1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                    <ol><li type="1"><div>Agency Commission is applicable only if the IO is created on Agency Account. IOs created on Advertiser Accounts are not entitled for Agency Commission.</div></li>
+                                    <li><div>If the IO Status is Draft/Generated, then only you will be able to change the Agency Commission by editing the IO.</div></li>
+                                    <li><div>If the IO Status is Signed and the IO is not yet uploaded, please raise a bug in Jira for SF team and we will unlock the IO for update.</div></li>
+                                    <li><div>If the IO is already uploaded with wrong Agency Commission, then you will need to create a Negative Revision and remove all the un-burnt funds from the account.</div></li></ol>
+                                    <div class="inside"><ol><li type="a"><div>If the IO is already uploaded with wrong Agency Commission, then you will need to create a Negative Revision and remove all the un-burnt funds from the account. Once you have uploaded the Negative Revision, you will need to create a new Opportunity and new IO with correct Agency commission and upload the same.</div></li></ol></div>
+                        </div>
+                    </div><!--/span-->    
+                    
+                    <div id="amount_edit_io" class="btn btn-default col-xs-10 .col-md-8 hidden-div even" href="#amount_edit_io1" role="button" data-toggle="collapse" data-parent=".jumbotron" >
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>How do I modify IO amount?</h5>                         
+                        <div id="amount_edit_io1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                    <ol><li type="1"><div>If the IO status is Draft/Generated, then please edit the amount on the related placements.</div></li></ol> 
+                                    <br/><b>Note :</b><br/> Sum of amount of all the placements rolls up to IO amount. Hence, changing placement amount will update the IO amount as well.<br/><br/>                                 
+                        </div>
+                    </div><!--/span-->                      
+                    <div id="cancel_io" class="btn btn-default col-xs-10 .col-md-8 hidden-div odd" href="#cancel_io1" role="button" data-toggle="collapse" data-parent=".jumbotron"><!--/span--> 
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Cancel/Delete IO</h5>                         
+                        <div id="cancel_io1" class="panel-collapse collapse note"  style="white-space: normal; ">                              
+                            
+                                <ol><li type="1"><div>IO should not be Uploaded to Network. If the IO is already uploaded and you want to Cancel the IO, then create a Negative Revision IO on the same Standard IO and upload it to Network to remove the funds.</div></li>                            
+                                <li><div>If the IO is not yet Uploaded, then please change the related Opportunity Stage as Dead/Lost and raise a bug in Jira for SF team to mark the IO as Cancelled.</div></li>
+                        </ol>
+                        </div>
+                    </div><!--/span-->                  
+                    <div id="unmap_io" class="btn btn-default col-xs-10 .col-md-8 hidden-div even" href="#unmap_io1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Unmap IO</h5>                         
+                        <div id="unmap_io1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                    <ol><li type="1"><div>If the IO is Mapped but not yet Uploaded and you want to unmap the IO, please raise a bug in Jira for the SF team and we will unmap the IO.</div></li>
+                                    <li><div>If the IO is already mapped as well as uploaded to Network, then please create a Negative Revision IO on the main IO and upload the same to remove all the transferred funds.</div></li></ol>
+                                    <div class="inside"><ol><li type="a"><div>Once you have removed all the transferred funds through this IO, raise a bug in Jira for SF team. We will unmap the IO.</div></li></ol></div>
+                        </div>
+                    </div><!--/span-->                    
+
+                    <div id="conversion_io" class="btn btn-default col-xs-10 .col-md-8 hidden-div odd" href="#conversion_io1" role="button" data-toggle="collapse" data-parent=".jumbotron" style="margin-bottom:100px;">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>What is the conversion rate applied on IO?</h5>                         
+                        <div id="conversion_io1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                    <ol><li type="1"><div>Conversion Rate for each local currency is uploaded in SalesForce on a monthly basis.</div></li>
+                                    <li><div>Conversion Rate data is provided by finance team every month.</div></li>
+                                    <li><div>On the IO, there is a field named Conversion Rate which stores the rate applied on that particular IO.</div></li>
+                                    <li><div>Based on this rate only, all the amount fields are converted from local currency to USD.</div></li></ol>                               
+                        </div>
+                    </div><!--/span-->                      
+                    
+                                    
+                </div><!--/row-->           
+                <div id="r_io" class="hidden-div vdeo" style="background-color:#D4D4D4; float:left; margin-bottom:10px;">
+                    <b>Related Videos</b><br/>
+                    <b><a  target="_blank" href="https://one.inmobi.com/edge/wp-content/uploads/sites/12/2014/02/how-to-create-a-standard-IO-video-71.mp4">How to create a Standard IO</a></b><br/>
+                    <b><a  target="_blank" href="https://one.inmobi.com/edge/wp-content/uploads/sites/12/2014/02/How-to-generate-an-IO-Template-video-9.mp4">How to generate an IO template</a></b><br/>
+                    <b><a  target="_blank" href="https://one.inmobi.com/edge/wp-content/uploads/sites/12/2014/02/how-to-upload-funds-video-171.mp4">How to upload funds</a></b><br/>                    
+                </div>
+                
+                </div>                    
+                <div id="Account" style="margin-top:10px; margin-left:5%;">             
+                <div id="Account1"><!--/row-->
+                    <div  id="account_currency" class="btn btn-default col-xs-10 .col-md-8 hidden-div odd" href="#account_currency1" role="button" data-toggle="collapse" data-parent=".jumbotron"><!--/span--> 
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Account Currency Change</h5>                         
+                        <div id="account_currency1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                <ol><li type="1"><div>If there are no Signed IOs on the Account, please contact regional finance team or raise a bug in Jira for SF team.</div></li>
+                                <li><div>If the Account already has multiple Signed IOs, then we can not change Account currency.</div></li></ol>
+                                <div class="inside"><ol><li type="a"><div>You can create the Opportunity/IO in currency which is different from Account currency.</div></li></ol></div>
+                        </div>
+                    </div><!--/span-->               
+                    <div id="account_type" class="btn btn-default col-xs-10 .col-md-8 hidden-div even" href="#account_type1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Account Type Change : Advertiser to Agency</h5>                         
+                        <div id="account_type1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                <ol><li type="1"><div>Please raise a bug in Jira for the SF team.</div></li>
+                                <li><div>Things to be taken care before raising the bug:</div></li></ol>
+                                <div class="inside"><ol><li type="a"><div>If the Account already has multiple Signed/Uploaded IOs, you will need to get the approval from your regional finance team.</div></li>
+                                <li type="a"><div>For all the Opportunities which have IOs in Draft/Generated/Signed status, update the Linked Client field on Opportunity as some Advertiser Account.</div></li>
+                                <li type="a"><div>Once the Account Type is changed to Agency, you will not be able to upload funds in the Network/Admin account which is mapped directly to the SalesForce Account.</div></li>
+                                <li type="a"><div>If you want to add funds in that Network/Admin Account in future, then you will need to delink the current mapping between SF Account and Network Account.</div></li>
+                                <li type="a"><div>For the delinking process, you will need to do Negative Revision on the all the IOs which are currently burning and then raise a bug for Delinking of current mapping.</div></li>
+                                <li type="a"><div>After delinking is done by SF team, you will need to map the SF Agency Account to a Shell Account created on Admin/Network. And the subsequent IO should be mapped to Service Account.</div></li></ol></div>
+                        </div>
+                    </div><!--span-->    
+                    <div id="account_type2" class="btn btn-default col-xs-10 .col-md-8 hidden-div odd" href="#account_type3" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Account Type Change : Agency to Advertiser</h5>                         
+                        <div id="account_type3" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                <ol><li type="1"><div>Please raise a bug in Jira for the SF team.</div></li>
+                                <li><div>Things to be taken care before raising the bug:</div></li></ol>
+                                <div class="inside"><ol><li type="a"><div>If the Account already has multiple Signed/Uploaded IOs, you will need to get the approval from your regional finance team.</div></li>
+                                <li type="a"><div>If the Account has IOs which are in Draft/Generated/Signed stage and has Agency Commission associated with them, the please update the Agency Commission as 0%.</div></li></ol></div>
+                        </div>
+                    </div><!--span-->                       
+  
+                   <div id="docusign_account" class="btn btn-default col-xs-10 .col-md-8 hidden-div even" href="#docusign_account1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Docusign Exception needed for SF Account</h5>                        
+                        <div id="docusign_account1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                <ol><li type="1"><div>Get approval from Head of Region/Your Manager in an email.</div></li>
+                                <li><div>Raise a bug in Jira for SF team and attach the approval email in the bug.</div></li></ol>
+                        </div>
+                    </div><!--span-->                       
+                   <div id="parent_account" class="btn btn-default col-xs-10 .col-md-8 hidden-div odd" href="#parent_account1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Please mark Account 'A' as parent of Account 'B'.</h5>                        
+                        <div id="parent_account1" class="panel-collapse collapse note"  style="white-space: normal; ">                           
+                                <ol><li type="1"><div>Raise a bug in Jira for SF team. We will do the required changes.</div></li></ol>                        
+                        </div>
+                    </div><!--span-->  
+
+                   <div id="billingcity_account" class="btn btn-default col-xs-10 .col-md-8 hidden-div even" href="#billingcity_account1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Request to change Billing City / Billing Country</h5>                        
+                        <div id="billingcity_account1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                    <ol><li type="1"><div>Please get an approval email from your Regional finance.</div></li>
+                                    <li><div>Raise a bug in Jira for SF Team and attach the approval mail to the bug.</div></li></ol>
+                        </div>
+                    </div><!--span-->                      
+                   <div id="billing_account" class="btn btn-default col-xs-10 .col-md-8 hidden-div odd" href="#billing_account1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Request to change Billing Address</h5>                        
+                        <div id="billing_account1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                <ol><li type="1"><div>Billing Details can be updated by the Account Team members of the Account/any user who has access to edit the concerned account.</div></li></ol>                       
+                                <br/><b>Note :</b> <br/>Billing City/Billing Country can be changed only by central SF Team.<br/>
+                        </div>
+                    </div><!--span-->                      
+                   <div id="add_to_acc" class="btn btn-default col-xs-10 .col-md-8 hidden-div even" href="#add_to_acc1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>How can I add myself to Account Team of a Account</h5>                        
+                        <div id="add_to_acc1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                    <ol><li type="1"><div>If you want to add yourself in a field(say Sales Account Owner) which is currently blank on the Account, then click the Add To Account Team button at the top of Account page and select your role and save it.</div></li> 
+                                    <li><div>If the field(say Sales Account Owner) on Account Page is not blank, please contact the existing Account Team Members of the account and they will be able to add you in the Account Team of the account.</div></li>
+                                    <li><div>If you are still not able to add yourself to account team, please raise a bug in Jira for SF Team. <br/>After required approvals, we will add you to the Account Team of the account.</div></li></ol>                                   
+                        </div>
+                    </div><!--span-->  
+                    
+                    <div id="map_account" class="btn btn-default col-xs-10 .col-md-8 hidden-div odd" href="#map_account1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Unable to Map SF Account to Network</h5>                         
+                        <div id="map_account1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                    <ol><li type="1"><div>Make sure you have edit access on the SF Account.</div></li> 
+                                    <li><div>Click Get Network ID button on Account and search for the Account.</div></li> 
+                                    <li><div>If you do not get a result on Search :</div></li></ol>
+                                    <div class="inside"><ol><li type="a"><div>Make sure the Network account is active.</div></li> 
+                                    <li type="a"><div>Make sure the Network Account is not mapped to any other account in SalesForce. If yes, you will need to raise a bug in Jira for SF Team to delink the old mapping.</div></li>
+                                    <li type="a"><div>Make sure the Network Account is not marked as Child Account of any other Network Account.</div></li></ol></div>
+                                    <br/>If you are still not able to map SF Account to Network, please raise a bug and SF Team will help you in resolving the issue.<br/> 
+                        </div>
+                    </div><!--span-->                        
+                    <div id="wrongmap_account" class="btn btn-default col-xs-10 .col-md-8 hidden-div even" href="#wrongmap_account1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>SF Account mapped to wrong Network Account</h5>                         
+                        <div id="wrongmap_account1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                    <ol><li type="1"><div>Please raise a bug in Jira for SF Team.</div></li>
+                                    <li><div>SF Team will delink the existing mapping and you should be able to map the account again to correct Network account.</div></li></ol>
+                        </div>
+                    </div><!--span--> 
+
+                    <div id="delink_account" class="btn btn-default col-xs-10 .col-md-8 hidden-div odd" href="#delink_account1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Account Delink</h5>                        
+                        <div id="delink_account1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                    <ol><li type="1"><div>Things to be taken care before raising the bug:</div></li></ol>
+                                    <div class="inside"><ol><li type="a"><div>If the Account has no IOs uploaded to Network/All the IOs which are uploaded are in Completed stage, then no need to check anything. SF Team will Delink the account immediately.</div></li>
+                                    <li type="a"><div>If the Account has IOs uploaded to Network and are not yet completely burnt, then you need to remove all the left-over funds of these IOs by doing Negative Revisions on the uploaded IOs.</div></li>
+                                    <li type="a"><div>Once the Status of all uploaded IOs changes to Completed, SF Team will delink the Account.</div></li></ol></div>
+                                    <br/><b>Note :</b> <br/>To know the current burn details of an IO, please click on the Synchronize Burn button available on the IO page.<br/>
+                        </div>
+                    </div><!--span-->  
+
+                    <div id="user_last_name" class="btn btn-default col-xs-10 .col-md-8 hidden-div even" href="#user_last_name1" role="button" data-toggle="collapse" data-parent=".jumbotron" style="margin-bottom:100px;">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>User's Last Name/First Name Missing error on Account page</h5>                        
+                        <div id="user_last_name1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                    <ol><li type="1"><div>Please update the First Name and Last Name of the user associated with the Network Account which is mapped with the SF Account.</div></li> 
+                                    <li><div>This change needs to be done on the Network/Admin side.</div></li></ol><br/>
+                        </div>
+                    </div><!--span-->                   
+                    <div id="r_Account" class="hidden-div vdeo" style="background-color:#D4D4D4; float:left; margin-bottom:10px;">
+                    <b>Related Videos</b><br/>
+                    <b><a target="_blank"  href="https://one.inmobi.com/edge/wp-content/uploads/sites/12/2014/02/How-to-create-an-account-video-4.mp4">How to create an Account</a></b><br/>
+                    <b><a  target="_blank" href="https://one.inmobi.com/edge/wp-content/uploads/sites/12/2014/02/how-to-add-team-members-to-an-account-video5.mp4">How to add account Team member to an Account</a></b><br/>
+                    <b><a  target="_blank" href="https://one.inmobi.com/edge/wp-content/uploads/sites/12/2014/02/how-to-convert-lead-video-2.mp4">How to convert Lead</a></b><br/>
+                    <b><a  target="_blank" href="https://one.inmobi.com/edge/wp-content/uploads/sites/12/2014/02/how-to-create-tasks-activities-on-leads-accounts-or-opportunitiesvideo-21.mp4">How to create Task Activity on Lead Account or Opportunity</a></b><br/>
+                    <b><a  target="_blank" href="https://one.inmobi.com/edge/wp-content/uploads/sites/12/2014/02/How-to-map-salesforce-account-to-network-or-admin-account-video-15.mp4">How to map Salesforce account to Network or Admin Account</a></b><br/>                       
+                    </div>                    
+                </div><!--row-->
+                </div>               
+                <div id="Opportunity"  style="margin-left:5%;">                
+                <div id="Opportunity1"><!--/row-->
+                
+                    <div id="amount_opp" class="btn btn-default col-xs-10 .col-md-8 hidden-div odd" href="#amount_opp1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>How do I modify Opportunity amount?</h5>                         
+                        <div id="amount_opp1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                    <ol><li type="1"><div>If there are no IOs created on the Opportunity, you can directly edit and modify the Opportunity amount.</div></li>
+                                    <li><div>If there is a Standard IO created on the Opportunity, then you will need to edit the placements created on the Standard IO.</div></li></ol><br/>
+                                    <b>Note:</b> <br/>Placement amount rolls up to the IO amount which in turn rolls up to Opportunity amount.<br/>                                  
+                        </div>
+                    </div><!--span--> 
+                
+                    <div id="admin_closed_opp" class="btn btn-default col-xs-10 .col-md-8 hidden-div even" href="#admin_closed_opp1" role="button" data-toggle="collapse" data-parent=".jumbotron">
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Unlock Closed Opportunity</h5>                         
+                        <div id="admin_closed_opp1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                    <ol><li type="1"><div>If the Opportunity is marked as Admin Close, please get an email approval from your reporting manager.</div></li> 
+                                    <li><div>Once you get the approval, raise a bug in Jira for SF Team and attach the approval email. We will do the needful.</div></li></ol>
+                        </div>
+                    </div><!--span--> 
+                
+                    <div  id="cancel_opp" class="btn btn-default col-xs-10 .col-md-8 hidden-div odd" href="#cancel_opp1" role="button" data-toggle="collapse" data-parent=".jumbotron"><!--/span--> 
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Cancel/Delete Opportunity</h5>                         
+                        <div id="cancel_opp1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                <ol><li type="1"><div>Please make sure that the IO related to the Opportunity is not Uploaded to Network.</div></li>
+                                <li><div>Opportunity can not be deleted. Users can mark the Opportunity as Dead/Lost.</div></li></ol>
+                        </div>
+                    </div><!--/span-->               
+                    <div id="r_opportunity" class="hidden-div vdeo" style="background-color:#D4D4D4; float:left; margin-top:40px; margin-bottom:10px;">
+                    <b>Related Videos</b><br/>
+                    <b><a target="_blank" href="https://one.inmobi.com/edge/wp-content/uploads/sites/12/2014/02/how-to-create-an-ad-sales-opportunity-video-6.mp4">How to create an Ad Sales Opportunity</a></b>
+                    </div>                           
+                                          
+                </div><!--row-->
+                </div>                          
+                <div id="Docusign" style="margin-top:10px; margin-left:5%;">                 
+                <div id="Docusign1"><!--/row-->
+                    <div  id="Docusign_video" class="btn btn-default col-xs-10 .col-md-8 hidden-div even" href="#Docusign_video1" role="button" data-toggle="collapse" data-parent=".jumbotron"><!--/span--> 
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Docusign is not working</h5>                         
+                        <div id="Docusign_video1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                <ol><li type="1"><div>Please make sure that the only person is added as Signer while sending the document through Docusign.</div></li></ol>
+                                <div class="inside"><ol><li type="a"><div>If more than one person is added as Signer, then all of them need to Sign the document to complete the process.</div></li></ol></div>
+                                <ol><li type="1" value="2"><div>In case of any error/modification to be done after you have already sent the document, you can log into your Docusign Account and modify the same from there.</div></li></ol>
+                                <div class="inside"><ol><li type="a"><div>If you don't want to modify the earlier Envelope, you can send a new document altogether following the same process and ignore the previous Docusign record in SF.</div></li></ol></div>
+                                <ol><li type="1" value="3"><div>If the docusign process is completed successfully and still the IO Status is not changed to Signed, you can attach the Signed copy to the IO in SF.</div></li></ol>
+                                <div class="inside"><ol><li type="a"><div>Then, raise a bug in Jira for SF Team and we will mark the IO as Signed.</div></li></ol></div>
+                        </div>
+                    </div><!--/span-->     
+                    
+                    <div  id="Docusign_account" class="btn btn-default col-xs-10 .col-md-8 hidden-div odd" href="#Docusign_account1" role="button" data-toggle="collapse" data-parent=".jumbotron"><!--/span--> 
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Exemption from Docusign for Account</h5>                         
+                        <div id="Docusign_account1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                <ol><li type="1"><div>Please get an email approval from your reporting manager/regional head.</div></li></ol>
+                                <div class="inside"><ol><li type="a"><div>Once you have the approval, raise a bug in Jira for SF Team and attach the approval email to the bug.</div></li>
+                                <li type="a"><div>We will mark the Account as Docusign Exempt.</div></li></ol></div>
+                        </div>
+                    </div><!--/span-->                  
+                    
+                    <div  id="Docusign_io" class="btn btn-default col-xs-10 .col-md-8 hidden-div even" href="#Docusign_io1" role="button" data-toggle="collapse" data-parent=".jumbotron"><!--/span--> 
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Exemption from Docusign for IO</h5>                         
+                        <div id="Docusign_io1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                <ol><li type="1"><div>Please get an email approval from your reporting manager.</div></li></ol>
+                                <div class="inside"><ol><li type="a"><div>Once you have the approval, raise a bug in Jira for SF Team and attach the approval email to the bug.</div></li>
+                                <li type="a"><div>We will mark the IO Signed.</div></li></ol></div>
+                        </div>
+                    </div><!--/span-->                      
+                    <div id="video1" class="hidden-div"><a style="cursor:pointer; margin-left:20px; position:fixed;"  target="_blank" href = "https://drive.google.com/a/inmobi.com/folderview?id=0B1B40MQZ54aMXzFmNVp3dU9iREk&usp=sharing">Docusign Videos</a></div>                       
+
+                </div><!--row-->
+                <div id="r_docusign" class="hidden-div vdeo" style="background-color:#D4D4D4; float:left; margin-left:-83%; margin-top:20px; margin-bottom:10px;"><br/><br/><br/><br/><br/><br/><br/><br/> 
+                    <b>Related Videos</b><br/>
+                    <b><a target="_blank" href="https://one.inmobi.com/edge/wp-content/uploads/sites/12/2014/02/DocusignTraining_FirstProcess_Step1.mp4">Docusign When Client Is A Salesforce Contact</a></b><br/>
+                    <b><a target="_blank" href="https://one.inmobi.com/edge/wp-content/uploads/sites/12/2014/02/DocusignTraining_SecondProcess_Step2.mp4">Docusign When Client Is Not A Salesforce Contact</a></b><br/>
+                    <b><a target="_blank" href="https://one.inmobi.com/edge/wp-content/uploads/sites/12/2014/02/DocusignTraining_E-Signature_Step3.mp4">Docusign Using E-Sign</a></b><br/>
+                    <b><a target="_blank" href="https://one.inmobi.com/edge/wp-content/uploads/sites/12/2014/02/DocusignTraining_Sign-On-Paper_Step4.mp4">Dosucign Using Fax/Scan</a></b><br/>
+                    </div>
+                </div>                                                                             
+                <div id="Placement" style="margin-top:10px; margin-left:5%;">                 
+                <div id="Placement1"><!--/row-->
+                    <div  id="Placement_delete" class="btn btn-default col-xs-10 .col-md-8 hidden-div odd" href="#Placement_delete1" role="button" data-toggle="collapse" data-parent=".jumbotron"><!--/span--> 
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Placement Delete</h5>                         
+                        <div id="Placement_delete1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                <ol><li type="1"><div>Please raise a bug in Jira for SF Team. We will do the needful.</div></li></ol>
+                                <br/><b>Note :</b><br/>
+                                Placement can be deleted only if the related IO is not yet Uploaded to Network/Admin.<br/>
+                                
+                        </div>
+                    </div><!--/span-->            
+                    <div  id="Placement_budget" class="btn btn-default col-xs-10 .col-md-8 hidden-div even" href="#Placement_budget1" role="button" data-toggle="collapse" data-parent=".jumbotron"><!--/span--> 
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Change Placement Details</h5>                         
+                        <div id="Placement_budget1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                <ol><li type="1"><div>If the related Standard IO is in Draft/Generated, then users can directly go to the placement page and edit the placement details.</div></li>
+                                <li><div>If the related Standard IO is in Signed Status or already uploaded to Network/Admin, then users can use the Placement Revision button on IO page and change the placement details.</div></li></ol>
+                                <br/><b>Note:</b> <br/>
+                                <ol><li type="1" value="1"><div>If the related Standard IO is in Signed Status or already uploaded to Network/Admin, then sum of total budget should be equal to Net IO Value of the Standard IO.</div></li>
+                                <li><div>The total amount of IO can neither be increased or decreased using Placement Revision button.</div></li>
+                                <li><div>If you want to add a new placement and move some part of budget from existing placement to the new placement, then you will need to create the new placement with Total Budget as 0.</div></li>
+                                <li><div>Once you have created the new placement with 0 budget, you can now use the Placement Revision button on the IO to trasfer the budget between placements.</div></li></ol>
+                        </div>
+                    </div><!--/span-->                              
+                    <div  id="amend_placement" class="btn btn-default col-xs-10 .col-md-8 hidden-div odd" href="#amend_placement1" role="button" data-toggle="collapse" data-parent=".jumbotron"><!--/span--> 
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Amend Clicks / Rate on Placement</h5>                         
+                        <div id="amend_placement1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                <ol><li type="1"><div>Click/Rate can be updated at any stage for CPC Placements using the Placement Revision button on the related IO page.</div></li>
+                                <li><div>In case of CPM Placements, the Total Budget is calculated based on Clicks and Rate entered on the placement.</div></li>
+                                <li><div>So, for CPM placements, modifying the Clicks/Rate might cause error if the recalculated Total budget is increased/decreased when compared to the original budget of the placement.</div></li></ol>
+                        </div>
+                    </div><!--/span-->                      
+                    <div  id="currency_placement" class="btn btn-default col-xs-10 .col-md-8 hidden-div even" href="#currency_placement1" role="button" data-toggle="collapse" data-parent=".jumbotron"><!--/span--> 
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Not able to change the IO / Placement currency</h5>                         
+                        <div id="currency_placement1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                <ol><li type="1"><div>Currency of IO and Placement is derived from the Opportunity currency.</div></li>
+                                <li><div>If you want change the currency of IO/Placement, you will need to update the currency of Opportunity.</div></li></ol>
+                                <div class="inside"><ol><li type="a"><div>Once you have changed the Opportunity currency, you just need to edit and save the IO and then the Placements once.</div></li></ol></div>
+                                <br/><b>Note :</b><br/>Opportunity currency should not be changed once the related Standard IO has been uploaded to Network.<br></br>                      
+                        </div>
+                    </div><!--/span-->   
+                    <div  id="new_placement" class="btn btn-default col-xs-10 .col-md-8 hidden-div odd" href="#new_placement1" role="button" data-toggle="collapse" data-parent=".jumbotron"><!--/span--> 
+                        <h5><span class="glyphicon glyphicon-chevron-down" style="float:right; margin-top:-10px;"></span>Not able to create New Placement on IO</h5>                         
+                        <div id="new_placement1" class="panel-collapse collapse note"  style="white-space: normal; ">
+                                <ol><li type="1"><div>If the IO Status of the Standard IO is Draft/Generated, you should be able to create new placement without any issue.</div></li>
+                                <li><div>If the IO Status is Signed or the IO is already uploaded, then you need to create placement with Total Budget as 0.</div></li></ol>
+                                <div class="inside"><ol><li type="a"><div>Then you can use the Placement Revision button on IO to assign budget to the placement.</div></li></ol></div>       
+                                <br/><b>Note :</b><br/>
+                                <ol><li type="1"><div>Once IO Status is Signed, you can not create new placement with Total Budget as other than 0.</div></li>
+                                <li><div>This is because of the reason that the IO amount is the sum of Total Budget of all the placements created under it.</div></li>
+                                <li><div>So if you create a new placement with some budget, once the IO is Signed, it will increase the IO Amount for which the IO was Signed which is not allowed as per process.</div></li></ol>
+                        </div>
+                    </div><!--/span--> 
+                    <div id="r_Placement" class="hidden-div vdeo" style="background-color:#D4D4D4; float:left; margin-top:40px; margin-bottom:10px;">
+                    <b>Related Videos</b><br/>
+                    <b><a target="_blank" href="https://one.inmobi.com/edge/wp-content/uploads/sites/12/2014/02/How-to-move-the-Budgetvideo-10.mp4">How to move Budget in Placement</a></b>
+                    </div>                    
+
+                </div><!--row-->
+                </div>                  
+                </div>
+                </div>  
+                <div id="error" class="hidden-div" style="text-align:center; margin-right:11%; margin-top:0px;">
+                            The search item is not found! <a target="_blank" href = "https://bugs.corp.inmobi.com/enter_bug.cgi?product=Salesforce%20Request"><b>Raise Bug Here.</b></a>
+                </div>               
+             </div>
+             
+    <site:googleAnalyticsTracking />
+                 
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script>   
+    var upload3;
+    (function(){
+        $('#cancel_io').removeClass('collapsed');
+        $("#training_").click(function(){
+         $(this).css("background-color","rgb(0, 138, 203)");
+        })
+        $("#video").click(function(){
+         $(this).css("background-color","#75bfe2");
+        })      
+        $("#video").hover(function(){
+           $(this).css("background-color","#75bfe2");
+                }); 
+        
+ 
+       $('.hidden-div').addClass('collapsed');
+       $(".ttry").addClass('collapsed');       
+       $('.list-group-item').on('click',function(evt){
+        $('.ttry').hide(); 
+        $('#videodiv').hide();  
+        var hideElement = evt.target.getAttribute('data-hide').split(','),
+            showElement = evt.target.getAttribute('data-show').split(','),i;
+        for(i=0;i<= hideElement.length;i++){
+           $('#'+hideElement[i]).hide();
+        }
+        for(i=0;i<= showElement.length;i++){
+          $('#'+showElement[i]).show();
+        }
+        $('.list-group-item.active').removeClass('active');
+        $(this).addClass('active');        
+        $('html, body').animate({
+            scrollTop: "0px"
+        }, 800);
+       });           
+        $('.list-group-item1').on('click',function(evt){
+        $('.ttry').hide();  
+        $('#videodiv').hide();  
+        var hideElement = evt.target.getAttribute('data-hide').split(','),
+            showElement = evt.target.getAttribute('data-show').split(','),i;
+        for(i=0;i<= hideElement.length;i++){
+           $('#'+hideElement[i]).hide();
+        }
+        for(i=0;i<= showElement.length;i++){
+          $('#'+showElement[i]).show();
+        }
+        $('.list-group-item1.active').removeClass('active');
+        $(this).addClass('active');    
+        $('html, body').animate({
+            scrollTop: "0px"
+        }, 800);
+       });   
+      
+       $(window).ready(function(){
+         var upload = upload = "r_io,generate_no_io,generate_io,submit_for_app,amount_edit_io,unlock_io,cancel_io,map_io,unmap_io,upload_io,prepay_io,agency_commission,cpl_io,conversion_io,other_IO",i;
+         if(upload){
+           $('.hidden-div').hide();
+           $('#videodiv').hide();   
+           var upload1 = upload.split(",");
+           for(i=0;i<=upload1.length;i++){
+                $('#'+upload1[i]).show();
+           }        }
+        else{
+         upload = "r_io,generate_no_io,generate_io,submit_for_app,amount_edit_io,unlock_io,cancel_io,map_io,unmap_io,upload_io,prepay_io,agency_commission,cpl_io,conversion_io,other_IO";
+        }              
+        if(upload){
+           $('.hidden-div').hide();
+           $('#videodiv').hide();   
+           var upload1 = upload.split(",");
+           for(i=0;i<=upload1.length;i++){
+                $('#'+upload1[i]).show();
+           }    }          });          
+        
+        if(upload3=='error')
+       { $('.videodiv').hide();
+       }
+   
+        }());                     
+        
+        $(".ttry").on('click', function() {
+            $(this).children("div").slideToggle();
+            $(this).toggleClass("highlight");
+            return false;
+        }); 
+ 
+        
+    </script>
+</apex:form>
+  </body> 
+</apex:page>
+                        
