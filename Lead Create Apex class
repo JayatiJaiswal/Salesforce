@@ -1,0 +1,237 @@
+/* 
+* Name       : LeadCreation
+* Description: SF Class for creating a LeadCreate        
+* Revision History:
+* 
+* Ver   Date            Author      Comments 
+* 1.0   29/06/2014      InMobi       Initial Draft.
+*/
+
+public with sharing class LeadCreate{
+    public boolean stagevalue {get;set;}  
+    public String NameSearchText {get; set;}
+    public boolean boolShowLeadList {get; set;}
+    public Boolean addInfoToggle {get; set;}   
+    public boolean boolshowAddMoreInfo{get;set;}
+    
+    // For De-Dupe based on the Opportunity Name entered by End User
+    public List<Account> matchedAccount{get; set;}
+    public List<Lead> matchedLeads {get; set;} 
+    public List<wrapperSearchOppName> wrapperSearchOppNameList {get; set;}
+        
+    // To Store the values of record passed from VF page
+
+    public Lead LeadData{get; set;}
+    public Boolean reminderToggle {get; set;}
+    // Contructor
+    public LeadCreate(ApexPages.StandardController controller){   
+
+        addInfoToggle = true;
+        boolShowLeadList = false;
+        boolshowAddMoreInfo = true;
+
+        if(controller != NULL)
+            LeadData = (Lead)controller.getRecord();
+        else
+            LeadData = new Lead ();
+        // set default values on page load as below    
+        LeadData.ownerId = Userinfo.getUserId();
+        LeadData.Expected_Closure_Date__c = Date.today() + 90;    
+        LeadData.Reminder_Date__c = Date.today() + 14; 
+        LeadData.LeadSource =  'Crawled List';
+        LeadData.Status = 'GOIB Lead';        
+        LeadData.Sales_Stage__c = 'Pending';
+        LeadData.Sales_Sub_Stage__c = 'None'; 
+        reminderToggle = false;                     
+    }
+        
+    // Wrapper Class to display all the matched values for account and lead
+    public class wrapperSearchOppName{
+        public String type {get; set;}
+        public Id Id {get; set;}
+        public String name {get; set;}
+        public String owner {get; set;}
+        public String region {get; set;}
+        public String country {get; set;}
+                    
+    }
+    public void displaymatchedLeads(){
+        wrapperSearchOppNameList = new List<wrapperSearchOppName>();
+        if(NameSearchText == '' || NameSearchText == null){
+            boolShowLeadList = false;         
+        }
+        else {
+            boolShowLeadList = true;
+            matchedLeads = [select Id,Name,owner.Name,title,Lead_Region__c,Country, lastmodifieddate from Lead where name like :('%'+NameSearchText+'%') limit 5];
+            matchedAccount = [select Id,Name,Account_Region_del__c,Billing_Country__c,Sales_Account_Owner__r.Name, lastmodifiedDate from Account where name like :('%'+NameSearchText+'%') limit 5];
+            for(Lead tempLead: matchedLeads){
+                if(tempLead != null){
+                    
+                }wrapperSearchOppName wrapList = new wrapperSearchOppName();             
+                    wrapList.Type ='Lead';
+                    wrapList.Id = tempLead.Id;
+                    wrapList.Name = tempLead.Name;
+                    wrapList.Owner = tempLead.Owner.Name;
+                    wrapList.Region = tempLead.Lead_Region__c;
+                    wrapList.country = tempLead.country;                  
+                    wrapperSearchOppNameList.add(wrapList);
+            }
+            for(Account tempAccount: matchedAccount){
+                if(tempAccount != null){
+                    wrapperSearchOppName wrapList = new wrapperSearchOppName();
+                    wrapList.Type ='Account';
+                    wrapList.Id = tempAccount.Id;
+                    wrapList.Name = tempAccount.Name;
+                    wrapList.owner = tempAccount.Sales_Account_Owner__r.Name;
+                    wrapList.Region = tempAccount.Account_Region_del__c;
+                    wrapList.country = tempAccount.Billing_Country__c;                
+                    wrapperSearchOppNameList.add(wrapList);
+                }
+            }         
+        }
+        if(wrapperSearchOppNameList == null || wrapperSearchOppNameList.size() == 0){
+            boolShowLeadList= false;
+        }
+    }
+
+
+    public PageReference saveLead(){ 
+    // Save record after validations
+        //    LeadData.id = NULL;
+        ApexPages.Message myMsg = new ApexPages.Message(ApexPages.Severity.ERROR,'Please update Company name.');
+        if(NameSearchText == null || NameSearchText == ''){ 
+            ApexPages.addMessage(myMsg);          
+            boolShowLeadList = false;
+            return null;
+        }
+        else if(LeadData.FirstName == null || LeadData.FirstName == ''){
+            LeadData.FirstName.addError('First name missing'); 
+            boolShowLeadList = false;
+            return null;
+        }        
+        else if(LeadData.LastName == null || LeadData.LastName == ''){
+            LeadData.LastName.addError('Last name missing'); 
+            boolShowLeadList = false;
+            return null;
+        }      
+        else if(LeadData.Country == null || LeadData.Country == ''){
+            LeadData.Country.addError('Country missing'); 
+            boolShowLeadList = false;
+            return null;
+        }   
+        else if(LeadData.Sales_Stage__c == 'Future Re-contact' && LeadData.Reminder_Date__c == null){       
+            LeadData.Reminder_Date__c.addError('Reminder date missing'); 
+            boolShowLeadList = false;
+            return null;           
+        }                    
+        else                                      //save the record with this block
+        {   
+            boolShowLeadList = false;             // to make the dedup search to disappear from the screen
+            LeadData.company = NameSearchText;
+            LeadData.id = NULL;
+            insert LeadData;         
+            return new PageReference('/'+LeadData.id);
+        }
+    }
+    
+        public PageReference saveandnew(){
+       ApexPages.Message myMsg = new ApexPages.Message(ApexPages.Severity.ERROR,'Please update Company name.');
+        if(NameSearchText == null || NameSearchText == ''){
+          ApexPages.addMessage(myMsg);   
+          boolShowLeadList = false;
+          return null;
+        }
+        else if(LeadData.FirstName == null || LeadData.FirstName == ''){
+          LeadData.FirstName.addError('First name missing'); 
+          boolShowLeadList = false;
+          return null;
+        }        
+        else if(LeadData.LastName == null || LeadData.LastName == ''){
+          LeadData.LastName.addError('Last name missing'); 
+          boolShowLeadList = false;
+          return null;
+        }      
+        else if(LeadData.Country == null || LeadData.Country == ''){
+          LeadData.Country.addError('Country missing'); 
+          boolShowLeadList = false;
+          return null;
+        }   
+        else if(LeadData.Sales_Stage__c == 'Future Re-contact' && LeadData.Reminder_Date__c == null){       
+          LeadData.Reminder_Date__c.addError('Reminder date missing');     
+          boolShowLeadList = false;            
+          return null;           
+        }                    
+        else 
+        {   // saving the record
+            boolShowLeadList = false;
+            boolshowAddMoreInfo = true;
+            LeadData.id = NULL;
+            LeadData.company = NameSearchText;
+            insert LeadData;                          
+            //Insert leadval; 
+            // reset all values to null so the new record can be entered on save and new
+            NameSearchText = null;
+            LeadData.FirstName = null;
+            LeadData.LastName = null;                  
+            LeadData.Email = null; 
+            LeadData.Source_Url__c = null;
+            LeadData.Country = null;
+            LeadData.Customer_Message__c = null;
+            LeadData.Expected_Closure_Date__c = Date.today() + 90;    
+            LeadData.Reminder_Date__c = Date.today() + 14; 
+            LeadData.LeadSource =  'Crawled List';
+            LeadData.Status = 'GOIB Lead';        
+            LeadData.Sales_Stage__c = 'Pending';
+            LeadData.Sales_Sub_Stage__c = 'None';             
+            LeadData.title = null;
+            LeadData.phone = null;
+            LeadData.Lead_Region__c = null;
+            LeadData.Lead_Value__c = null;
+            LeadData.Enrichment_Level__c = null;
+            LeadData.Lead_SubSource__c = null;
+            LeadData.Lead_Type__c = null;
+            LeadData.Lead_Segment__c = null;
+            LeadData.Industry = null;
+            LeadData.Email_Optin__c = null;
+            LeadData.Website = null;
+            LeadData.Total_Installs__c = null;
+            LeadData.Total_Rating_Count__c = null;
+            LeadData.Total_Number_of_Apps__c = null;
+            LeadData.Total_Impressions_Potential__c = null;
+            LeadData.Average_App_Rating__c = null;
+            LeadData.Integration_Method__c = null;
+            LeadData.Integration_Info__c = null;
+            LeadData.App_Nature__c = null;
+            LeadData.Platform__c = null;
+            LeadData.App_Category__c = null;
+            LeadData.Top_Level_Category__c = null;
+            LeadData.Sub_Category__c = null;
+            LeadData.Pitch_Task__c = null;
+            LeadData.Behavioral_Score__c = null;
+            LeadData.Demographic_Score__c = null;
+            LeadData.Product_Opportunity__c = null;
+            LeadData.Expected_Burn_per_day__c = null;          
+            
+            addInfoToggle = true;            
+            return new PageReference('/apex/newLead');
+        }
+      }
+           
+    // For implementing add more info - detailed page
+    public void addMoreInfo(){
+    boolshowAddMoreInfo = false;
+    ApexPages.Message myMsg = new ApexPages.Message(ApexPages.Severity.ERROR,'Please enter the company name.');
+        if(NameSearchText == null || NameSearchText == ''){      
+        // Entering company name manadatory before redirecting to add more info page
+              ApexPages.addMessage(myMsg);                   
+              boolshowAddMoreInfo = true;
+        }
+        else { 
+        // set add info button visibility to false
+        addInfoToggle = false; }                                    
+    }  
+    
+    public PageReference cancel(){
+      return new PageReference('/home/home.jsp');  
+    } 
+}
