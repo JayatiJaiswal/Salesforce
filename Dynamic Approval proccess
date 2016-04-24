@@ -1,0 +1,97 @@
+   Trigger InventoryRequest on Inventory_Request__c (before insert,before update,after insert) {
+		FieldInventoryRequest helperClass = new FieldInventoryRequest();   
+		if((trigger.isInsert && trigger.isBefore)||(trigger.isUpdate && trigger.isBefore)){
+			helperClass.dynamicApprovalProccessInventoryRequest(Trigger.new); 
+		}                   
+	}
+
+   Desciption : This function is written to select approver for Inventory_requests__c records. 
+   The records stored in Inventory_Matrix__c is used to determine the approver for Inevntory Requests records based on Quote amount and country.
+      
+    public void dynamicApprovalProccessInventoryRequest(List<Inventory_Request__c> triggerNew){
+        
+       //Assign the Tiers to thier related countries and store it in <map>
+        Map<String,List<InventoryMatrix__c>> mapToInventoryMatrixCountry = new Map<String,List<InventoryMatrix__c>>();
+        Map<String,List<InventoryMatrix__c>> mapToInventoryMatrixDivision = new Map<String,List<InventoryMatrix__c>>();
+            
+        List<InventoryMatrix__c> allCountries = new List<InventoryMatrix__c>();
+        List<InventoryMatrix__c> allDivision = new List<InventoryMatrix__c>();
+        
+        //Storing the tiers correspoding to thier country in <map>
+        for(InventoryMatrix__c InvMat : [SELECT Country__c, Division__c, Name, Amount__c, Manager_1__c, Manager_2__c, Manager_3__c, Manager_4__c FROM InventoryMatrix__c ORDER BY Country__c])
+        {
+            allCountries = mapToInventoryMatrixCountry.get(InvMat.Country__c); 
+            allDivision = mapToInventoryMatrixDivision.get(InvMat.Division__c);    
+                
+            if(allCountries == null && (InvMat.Country__c!=null)){
+                allCountries = new List<InventoryMatrix__c>();
+                allCountries.add(InvMat);
+                mapToInventoryMatrixCountry.put(InvMat.Country__c,allCountries);
+            }
+            
+            if(allDivision == null && (InvMat.Division__c!=null)){
+                allDivision = new List<InventoryMatrix__c>();
+                allDivision.add(InvMat);
+                mapToInventoryMatrixDivision.put(InvMat.Division__c,allDivision);
+                           
+            }
+    
+            if(InvMat.Division__c!=null){
+                allDivision.add(InvMat);
+                mapToInventoryMatrixDivision.put(InvMat.Division__c,allDivision);              
+            }
+            
+            if(InvMat.Country__c!=null){   
+                allCountries.add(InvMat);
+                mapToInventoryMatrixCountry.put(InvMat.Country__c,allCountries);                                     
+            }
+        }
+        List<ID> allAccountIDs = new List<ID>();
+        for(Inventory_Request__c rec : triggerNew){
+            allAccountIDs.add(rec.SFDC_Customer_Account_Name__c);
+        }
+        
+        Map<ID,Account> AllAccountsToUpdate = new Map<ID,Account>([SELECT ID, District_Lookup__r.Division__c FROM Account WHERE ID IN : allAccountIDs]);
+        for(Inventory_Request__c rec : triggerNew){   
+    
+            //Sort the list on amount__c for correct calculation
+            List<InventoryMatrix__c> sortedList =  mapToInventoryMatrixCountry.get(rec.Customer_Install_Country__c);
+            if(sortedList == null)
+            {  
+                sortedList =  mapToInventoryMatrixDivision.get(AllAccountsToUpdate.get(rec.SFDC_Customer_Account_Name__c).District_Lookup__r.Division__c);
+            }
+            if(sortedList != null){        
+                InventoryMatrix__c temp; Integer j;
+                boolean flag = true; 
+                while ( flag ){
+                    flag= false;
+                    for( j=0;  j < sortedList.size()-1;  j++ ){
+                        if(sortedList[j].Amount__c > sortedList[j+1].Amount__c){
+                            temp = sortedList[j];
+                            sortedList[j] = sortedList[j+1];
+                            sortedList[j+1] = temp;
+                            flag = true;
+                        }
+                    }
+                }
+            }
+    
+            //Compare the amount values and store the tier and manager details from Inventory Matrix object
+            for(integer i = 0;i<sortedList.size()-1;i++){  
+                if((rec.Quote_Amount__c > sortedList[i].Amount__c) && (rec.Quote_Amount__c <= sortedList[i+1].Amount__c)){
+                     rec.tier__c = sortedList[i+1].id;
+                     rec.Manager1__c = sortedList[i+1].Manager_1__c;
+                     rec.Manager2__c = sortedList[i+1].Manager_2__c;
+                     rec.Manager3__c = sortedList[i+1].Manager_3__c;
+                     rec.Manager4__c = sortedList[i+1].Manager_4__c;                     
+                }
+                    if((rec.Quote_Amount__c == 0)){
+                     rec.tier__c = sortedList[0].id;
+                     rec.Manager1__c = sortedList[0].Manager_1__c;
+                     rec.Manager2__c = sortedList[0].Manager_2__c;
+                     rec.Manager3__c = sortedList[0].Manager_3__c;
+                     rec.Manager4__c = sortedList[0].Manager_4__c;                     
+                }                    
+            } 
+        }                                     
+    }
