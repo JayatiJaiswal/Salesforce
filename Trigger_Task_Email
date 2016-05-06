@@ -1,5 +1,7 @@
 //Date 23/11/2013
 //Author : Jayati Jaiswal
+// Description : Send an email to AccounTeamMembers when a new task is created or when an existing task is updated. 
+// The email should contain all the attachments that are attched to the task record.
 
 trigger Trigger_Task_Email on Task (after insert, after update) {
 
